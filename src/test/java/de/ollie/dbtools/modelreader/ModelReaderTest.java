@@ -1,7 +1,7 @@
 /*
  * ModelReaderTest.java
  *
- * 20.09.2018
+ * 20.09.2018 :o)
  *
  * (c) by O.Lieshoff 
  */
