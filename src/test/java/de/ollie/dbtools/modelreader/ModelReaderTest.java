@@ -41,7 +41,14 @@ public class ModelReaderTest {
 	private static final String COLUMN_NAME_1 = "Id";
 	private static final String COLUMN_NAME_2 = "Name";
 	private static final String COLUMN_NAME_3 = "Salary";
-	private static final String TABLE_NAME = "TestTable";
+	private static final String COLUMN_NAME_4 = "field4";
+	private static final String COLUMN_NAME_5 = "field5";
+	private static final String COLUMN_NAME_6 = "field6";
+	private static final String COLUMN_NAME_7 = "field7";
+	private static final String COLUMN_NAME_8 = "field8";
+	private static final String COLUMN_NAME_9 = "field9";
+	private static final String TABLE_NAME_1 = "TestTable";
+	private static final String TABLE_NAME_2 = "AnotherTestTable";
 
 	@InjectMocks
 	private ModelReader unitUnderTest;
@@ -95,7 +102,7 @@ public class ModelReaderTest {
 
 	private void createDatabase(Connection connection) throws Exception {
 		Statement stmt = connection.createStatement();
-		stmt.execute("CREATE TABLE " + TABLE_NAME + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
 				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2))");
 		stmt.close();
 	}
@@ -106,7 +113,7 @@ public class ModelReaderTest {
 		// Prepare
 		createDatabase(this.connectionSource);
 
-		DBTableModelDTO table = new DBTableModelDTO(TABLE_NAME.toUpperCase(), new ArrayList<DBColumnModel>());
+		DBTableModelDTO table = new DBTableModelDTO(TABLE_NAME_1.toUpperCase(), new ArrayList<DBColumnModel>());
 		List<DBTableModel> tables = new ArrayList<>();
 		tables.add(table);
 		DBDataModel expected = new DBDataModelDTO(tables);
@@ -115,7 +122,7 @@ public class ModelReaderTest {
 		DBDataModel returned = this.unitUnderTest.readModel(this.connectionSource);
 
 		// Check
-		assertEquals(TABLE_NAME.toUpperCase(), returned.getTables().get(0).getName());
+		assertEquals(TABLE_NAME_1.toUpperCase(), returned.getTables().get(0).getName());
 	}
 
 	@Test
@@ -128,7 +135,7 @@ public class ModelReaderTest {
 		columns.add(new DBColumnModelDTO(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
 		columns.add(new DBColumnModelDTO(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
 		columns.add(new DBColumnModelDTO(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
-		DBTableModelDTO table = new DBTableModelDTO(TABLE_NAME.toUpperCase(), columns);
+		DBTableModelDTO table = new DBTableModelDTO(TABLE_NAME_1.toUpperCase(), columns);
 		List<DBTableModel> tables = new ArrayList<>();
 		tables.add(table);
 		DBDataModel expected = new DBDataModelDTO(tables);
@@ -138,6 +145,75 @@ public class ModelReaderTest {
 
 		// Check
 		assertEquals(expected.toString(), returned.toString());
+	}
+
+	@Test
+	public void readModel_ValidConnectionWithTwoTableAndColumnsPassed_ReturnsTheModelOfTheDatabaseLinkedToTheConnection()
+			throws Exception {
+		// Prepare
+		createDatabaseWithTwoTables(this.connectionSource);
+
+		List<DBColumnModel> columns1 = new ArrayList<>();
+		columns1.add(new DBColumnModelDTO(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
+		columns1.add(new DBColumnModelDTO(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
+		columns1.add(new DBColumnModelDTO(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
+		DBTableModelDTO table1 = new DBTableModelDTO(TABLE_NAME_1.toUpperCase(), columns1);
+		List<DBColumnModel> columns2 = new ArrayList<>();
+		columns2.add(new DBColumnModelDTO(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
+		columns2.add(new DBColumnModelDTO(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
+		columns2.add(new DBColumnModelDTO(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
+		DBTableModelDTO table2 = new DBTableModelDTO(TABLE_NAME_2.toUpperCase(), columns1);
+		List<DBTableModel> tables = new ArrayList<>();
+		tables.add(table2);
+		tables.add(table1);
+		DBDataModel expected = new DBDataModelDTO(tables);
+
+		// Run
+		DBDataModel returned = this.unitUnderTest.readModel(this.connectionSource);
+
+		// Check
+		assertEquals(expected.toString(), returned.toString());
+	}
+
+	private void createDatabaseWithTwoTables(Connection connection) throws Exception {
+		Statement stmt = connection.createStatement();
+		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2))");
+		stmt.execute("CREATE TABLE " + TABLE_NAME_2 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2))");
+		stmt.close();
+	}
+
+	@Test
+	public void readModel_ValidConnectionWithATableWithFieldsOfAllTypesPassed_ReturnsTheModelOfTheDatabaseLinkedToTheConnection()
+			throws Exception {
+		// Prepare
+		createDatabaseWithATableWithFieldsAllTypes(this.connectionSource);
+
+		List<DBColumnModel> columns = new ArrayList<>();
+		columns.add(new DBColumnModelDTO(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
+		columns.add(new DBColumnModelDTO(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
+		columns.add(new DBColumnModelDTO(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
+		columns.add(new DBColumnModelDTO(COLUMN_NAME_4.toUpperCase(), "CHARACTER", Types.CHAR, 12, -1));
+		columns.add(new DBColumnModelDTO(COLUMN_NAME_5.toUpperCase(), "DECIMAL", Types.DECIMAL, 24, 12));
+		DBTableModelDTO table = new DBTableModelDTO(TABLE_NAME_1.toUpperCase(), columns);
+		List<DBTableModel> tables = new ArrayList<>();
+		tables.add(table);
+		DBDataModel expected = new DBDataModelDTO(tables);
+
+		// Run
+		DBDataModel returned = this.unitUnderTest.readModel(this.connectionSource);
+
+		// Check
+		assertEquals(expected.toString(), returned.toString());
+	}
+
+	private void createDatabaseWithATableWithFieldsAllTypes(Connection connection) throws Exception {
+		Statement stmt = connection.createStatement();
+		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2), " + COLUMN_NAME_4 + " CHAR(12), " + COLUMN_NAME_5
+				+ " DECIMAL(24,12))");
+		stmt.close();
 	}
 
 }
