@@ -1,7 +1,7 @@
 /*
  * ModelReaderTest.java
  *
- * 20.09.2018 :o)
+ * 20.09.2018
  *
  * (c) by O.Lieshoff 
  */
@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import de.ollie.dbtools.modelreader.dto.DBColumnModelDTO;
 import de.ollie.dbtools.modelreader.dto.DBDataModelDTO;
