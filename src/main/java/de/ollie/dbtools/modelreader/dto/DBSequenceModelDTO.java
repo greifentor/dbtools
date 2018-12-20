@@ -1,15 +1,12 @@
 package de.ollie.dbtools.modelreader.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.ToString;
 
 /**
- * A container for table data.
+ * A container for the sequence model.
  *
  * @author ollie
  *
@@ -18,10 +15,10 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString
-public class DBTableModelDTO {
+public class DBSequenceModelDTO {
 
-	@NonNull
 	private String name;
-	private List<DBColumnModelDTO> columns;
+	private int start;
+	private int increment;
 
 }

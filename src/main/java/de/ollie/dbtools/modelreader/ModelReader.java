@@ -17,6 +17,7 @@ import java.util.List;
 
 import de.ollie.dbtools.modelreader.dto.DBColumnModelDTO;
 import de.ollie.dbtools.modelreader.dto.DBDataModelDTO;
+import de.ollie.dbtools.modelreader.dto.DBSequenceModelDTO;
 import de.ollie.dbtools.modelreader.dto.DBTableModelDTO;
 
 /**
@@ -34,16 +35,17 @@ public class ModelReader {
 	 * @throws SQLException             If an error occurs while accessing the database.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public DBDataModel readModel(Connection connection) throws SQLException {
+	public DBDataModelDTO readModel(Connection connection) throws SQLException {
 		DatabaseMetaData dbmd = connection.getMetaData();
-		List<DBTableModel> tables = getTables(dbmd);
-		return new DBDataModelDTO(tables);
+		List<DBTableModelDTO> tables = getTables(dbmd);
+		List<DBSequenceModelDTO> sequences = getSequences(dbmd);
+		return new DBDataModelDTO(tables, sequences);
 	}
 
-	private List<DBTableModel> getTables(DatabaseMetaData dbmd) throws SQLException {
+	private List<DBTableModelDTO> getTables(DatabaseMetaData dbmd) throws SQLException {
 		List<DBTableModelDTO> tables = readTables(dbmd);
 		loadColumns(dbmd, tables);
-		return new ArrayList<DBTableModel>(tables);
+		return new ArrayList<DBTableModelDTO>(tables);
 	}
 
 	private List<DBTableModelDTO> readTables(DatabaseMetaData dbmd) throws SQLException {
@@ -51,7 +53,7 @@ public class ModelReader {
 		ResultSet rs = dbmd.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
-			tables.add(new DBTableModelDTO(tableName, new ArrayList<DBColumnModel>()));
+			tables.add(new DBTableModelDTO(tableName, new ArrayList<DBColumnModelDTO>()));
 		}
 		rs.close();
 		return tables;
@@ -78,6 +80,11 @@ public class ModelReader {
 			}
 			rs.close();
 		}
+	}
+
+	private List<DBSequenceModelDTO> getSequences(DatabaseMetaData dbmd) throws SQLException {
+		List<DBSequenceModelDTO> sequences = new ArrayList<>();
+		return sequences;
 	}
 
 }

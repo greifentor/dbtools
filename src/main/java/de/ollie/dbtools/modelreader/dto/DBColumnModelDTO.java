@@ -1,6 +1,5 @@
 package de.ollie.dbtools.modelreader.dto;
 
-import de.ollie.dbtools.modelreader.DBColumnModel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,14 +9,14 @@ import lombok.ToString;
 /**
  * A Container for column data.
  *
- * @author O.Lieshoff
+ * @author ollie
  *
  */
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString
-public class DBColumnModelDTO implements DBColumnModel {
+public class DBColumnModelDTO {
 
 	@NonNull
 	private String name;
