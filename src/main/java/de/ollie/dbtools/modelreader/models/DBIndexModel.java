@@ -1,4 +1,6 @@
-package de.ollie.dbtools.modelreader.dto;
+package de.ollie.dbtools.modelreader.models;
+
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -6,7 +8,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * A container for the sequence model.
+ * A container for an index.
  *
  * @author ollie
  *
@@ -15,10 +17,9 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString
-public class DBSequenceModelDTO {
+public class DBIndexModel {
 
 	private String name;
-	private int start;
-	private int increment;
+	private List<DBColumnModel> columns;
 
 }

@@ -1,4 +1,4 @@
-package de.ollie.dbtools.modelreader.dto;
+package de.ollie.dbtools.modelreader.models;
 
 import java.util.List;
 
@@ -17,9 +17,9 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString
-public class DBDataModelDTO {
+public class DBDataModel {
 
-	private List<DBTableModelDTO> tables;
-	private List<DBSequenceModelDTO> sequences;
+	private List<DBTableModel> tables;
+	private List<DBSequenceModel> sequences;
 
 }

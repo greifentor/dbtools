@@ -15,10 +15,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ollie.dbtools.modelreader.dto.DBColumnModelDTO;
-import de.ollie.dbtools.modelreader.dto.DBDataModelDTO;
-import de.ollie.dbtools.modelreader.dto.DBSequenceModelDTO;
-import de.ollie.dbtools.modelreader.dto.DBTableModelDTO;
+import de.ollie.dbtools.modelreader.models.DBColumnModel;
+import de.ollie.dbtools.modelreader.models.DBDataModel;
+import de.ollie.dbtools.modelreader.models.DBIndexModel;
+import de.ollie.dbtools.modelreader.models.DBSequenceModel;
+import de.ollie.dbtools.modelreader.models.DBTableModel;
 
 /**
  * A class which is able to read the meta data of a database.
@@ -35,32 +36,33 @@ public class ModelReader {
 	 * @throws SQLException             If an error occurs while accessing the database.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public DBDataModelDTO readModel(Connection connection) throws SQLException {
+	public DBDataModel readModel(Connection connection) throws SQLException {
 		DatabaseMetaData dbmd = connection.getMetaData();
-		List<DBTableModelDTO> tables = getTables(dbmd);
-		List<DBSequenceModelDTO> sequences = getSequences(dbmd);
-		return new DBDataModelDTO(tables, sequences);
+		List<DBTableModel> tables = getTables(dbmd);
+		List<DBSequenceModel> sequences = getSequences(dbmd);
+		return new DBDataModel(tables, sequences);
 	}
 
-	private List<DBTableModelDTO> getTables(DatabaseMetaData dbmd) throws SQLException {
-		List<DBTableModelDTO> tables = readTables(dbmd);
+	private List<DBTableModel> getTables(DatabaseMetaData dbmd) throws SQLException {
+		List<DBTableModel> tables = readTables(dbmd);
 		loadColumns(dbmd, tables);
-		return new ArrayList<DBTableModelDTO>(tables);
+		loadIndices(dbmd, tables);
+		return new ArrayList<DBTableModel>(tables);
 	}
 
-	private List<DBTableModelDTO> readTables(DatabaseMetaData dbmd) throws SQLException {
-		List<DBTableModelDTO> tables = new ArrayList<>();
+	private List<DBTableModel> readTables(DatabaseMetaData dbmd) throws SQLException {
+		List<DBTableModel> tables = new ArrayList<>();
 		ResultSet rs = dbmd.getTables(null, null, null, new String[] { "TABLE", "VIEW" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
-			tables.add(new DBTableModelDTO(tableName, new ArrayList<DBColumnModelDTO>()));
+			tables.add(new DBTableModel(tableName, new ArrayList<>(), new ArrayList<>()));
 		}
 		rs.close();
 		return tables;
 	}
 
-	private void loadColumns(DatabaseMetaData dbmd, List<DBTableModelDTO> tables) throws SQLException {
-		for (DBTableModelDTO table : tables) {
+	private void loadColumns(DatabaseMetaData dbmd, List<DBTableModel> tables) throws SQLException {
+		for (DBTableModel table : tables) {
 			ResultSet rs = dbmd.getColumns(null, null, table.getName(), "%");
 			while (rs.next()) {
 				String columnName = rs.getString("COLUMN_NAME");
@@ -76,14 +78,51 @@ public class ModelReader {
 				if ((dataType == Types.DECIMAL) || (dataType == Types.NUMERIC)) {
 					decimalDigits = rs.getInt("DECIMAL_DIGITS");
 				}
-				table.getColumns().add(new DBColumnModelDTO(columnName, typeName, dataType, columnSize, decimalDigits));
+				table.getColumns().add(new DBColumnModel(columnName, typeName, dataType, columnSize, decimalDigits));
 			}
 			rs.close();
 		}
 	}
 
-	private List<DBSequenceModelDTO> getSequences(DatabaseMetaData dbmd) throws SQLException {
-		List<DBSequenceModelDTO> sequences = new ArrayList<>();
+	private void loadIndices(DatabaseMetaData dbmd, List<DBTableModel> tables) throws SQLException {
+		for (DBTableModel table : tables) {
+			ResultSet rs = dbmd.getIndexInfo(null, null, table.getName(), false, false);
+			while (rs.next()) {
+				boolean nonUniqueIndex = rs.getBoolean("NON_UNIQUE");
+				if (nonUniqueIndex) {
+					String indexName = rs.getString("INDEX_NAME");
+					String columnName = rs.getString("COLUMN_NAME");
+					DBIndexModel index = getIndexByName(indexName, table);
+					DBColumnModel column = getColumnByName(columnName, table);
+					index.getColumns().add(column);
+				}
+			}
+			rs.close();
+		}
+	}
+
+	private DBIndexModel getIndexByName(String name, DBTableModel table) {
+		for (DBIndexModel index : table.getIndices()) {
+			if (index.getName().equals(name)) {
+				return index;
+			}
+		}
+		DBIndexModel index = new DBIndexModel(name, new ArrayList<>());
+		table.getIndices().add(index);
+		return index;
+	}
+
+	private DBColumnModel getColumnByName(String name, DBTableModel table) {
+		for (DBColumnModel column : table.getColumns()) {
+			if (column.getName().equals(name)) {
+				return column;
+			}
+		}
+		throw new IllegalArgumentException("column '" + name + "' does not exist in table '" + table.getName() + "'.");
+	}
+
+	private List<DBSequenceModel> getSequences(DatabaseMetaData dbmd) throws SQLException {
+		List<DBSequenceModel> sequences = new ArrayList<>();
 		return sequences;
 	}
 
