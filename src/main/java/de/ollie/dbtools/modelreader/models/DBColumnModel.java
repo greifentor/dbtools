@@ -1,5 +1,6 @@
 package de.ollie.dbtools.modelreader.models;
 
+import de.ollie.dbtools.modelreader.DBColumn;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString
-public class DBColumnModel {
+public class DBColumnModel implements DBColumn {
 
 	@NonNull
 	private String name;

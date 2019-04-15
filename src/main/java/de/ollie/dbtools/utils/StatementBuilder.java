@@ -2,7 +2,7 @@ package de.ollie.dbtools.utils;
 
 import java.util.Objects;
 
-import de.ollie.dbtools.modelreader.models.DBColumnModel;
+import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 
 /**
@@ -16,20 +16,17 @@ public class StatementBuilder {
 	/**
 	 * Build a select statement string for the passed table model.
 	 *
-	 * @param table
-	 *            The table model which the statement is to build for.
+	 * @param table The table model which the statement is to build for.
 	 * @return A select statement for the passed table model.
-	 * @throws NullPointerException
-	 *             Passing a null value as table.
+	 * @throws NullPointerException Passing a null value as table.
 	 */
 	public String createSelectStatementString(DBTableModel table) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Table '" + table.getName() + "' has no columns.");
+			throw new IllegalArgumentException("Table '" + table.getName() + "' has no columns.");
 		}
 		StringBuilder sb = new StringBuilder("");
-		for (DBColumnModel column : table.getColumns()) {
+		for (DBColumn column : table.getColumns()) {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			} else {
@@ -42,23 +39,19 @@ public class StatementBuilder {
 	}
 
 	/**
-	 * Build an insert statement string for the passed table model with '?'
-	 * characters instead of values.
+	 * Build an insert statement string for the passed table model with '?' characters instead of values.
 	 *
-	 * @param table
-	 *            The table model which the statement is to build for.
+	 * @param table The table model which the statement is to build for.
 	 * @return An insert statement for the passed table model.
-	 * @throws NullPointerException
-	 *             Passing a null value as table.
+	 * @throws NullPointerException Passing a null value as table.
 	 */
 	public String createInsertStatementString(DBTableModel table) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Table '" + table.getName() + "' has no columns.");
+			throw new IllegalArgumentException("Table '" + table.getName() + "' has no columns.");
 		}
 		StringBuilder sb = new StringBuilder("");
-		for (DBColumnModel column : table.getColumns()) {
+		for (DBColumn column : table.getColumns()) {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			} else {
@@ -72,7 +65,7 @@ public class StatementBuilder {
 
 	private String createPlaceHolders(DBTableModel table) {
 		StringBuilder sb = new StringBuilder("");
-		for (DBColumnModel column : table.getColumns()) {
+		for (int i = 0, leni = table.getColumns().size(); i < leni; i++) {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			}

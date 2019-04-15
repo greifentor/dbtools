@@ -15,9 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBDataModel;
-import de.ollie.dbtools.modelreader.models.DBIndexModel;
 import de.ollie.dbtools.modelreader.models.DBSequenceModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 
@@ -27,6 +25,18 @@ import de.ollie.dbtools.modelreader.models.DBTableModel;
  * @author O.Lieshoff
  */
 public class ModelReader {
+
+	private DBObjectFactory factory;
+
+	/**
+	 * Creates a new model reader with the passed parameters.
+	 *
+	 * @param factory An object factory implementation to create the DB objects.
+	 */
+	public ModelReader(DBObjectFactory factory) {
+		super();
+		this.factory = factory;
+	}
 
 	/**
 	 * Read the data model which is representing the database linked to the passed connection.
@@ -78,7 +88,8 @@ public class ModelReader {
 				if ((dataType == Types.DECIMAL) || (dataType == Types.NUMERIC)) {
 					decimalDigits = rs.getInt("DECIMAL_DIGITS");
 				}
-				table.getColumns().add(new DBColumnModel(columnName, typeName, dataType, columnSize, decimalDigits));
+				table.getColumns()
+						.add(this.factory.createColumn(columnName, typeName, dataType, columnSize, decimalDigits));
 			}
 			rs.close();
 		}
@@ -92,8 +103,8 @@ public class ModelReader {
 				if (nonUniqueIndex) {
 					String indexName = rs.getString("INDEX_NAME");
 					String columnName = rs.getString("COLUMN_NAME");
-					DBIndexModel index = getIndexByName(indexName, table);
-					DBColumnModel column = getColumnByName(columnName, table);
+					DBIndex index = getIndexByName(indexName, table);
+					DBColumn column = getColumnByName(columnName, table);
 					index.getColumns().add(column);
 				}
 			}
@@ -101,19 +112,19 @@ public class ModelReader {
 		}
 	}
 
-	private DBIndexModel getIndexByName(String name, DBTableModel table) {
-		for (DBIndexModel index : table.getIndices()) {
+	private DBIndex getIndexByName(String name, DBTableModel table) {
+		for (DBIndex index : table.getIndices()) {
 			if (index.getName().equals(name)) {
 				return index;
 			}
 		}
-		DBIndexModel index = new DBIndexModel(name, new ArrayList<>());
+		DBIndex index = this.factory.createIndex(name, new ArrayList<>());
 		table.getIndices().add(index);
 		return index;
 	}
 
-	private DBColumnModel getColumnByName(String name, DBTableModel table) {
-		for (DBColumnModel column : table.getColumns()) {
+	private DBColumn getColumnByName(String name, DBTableModel table) {
+		for (DBColumn column : table.getColumns()) {
 			if (column.getName().equals(name)) {
 				return column;
 			}

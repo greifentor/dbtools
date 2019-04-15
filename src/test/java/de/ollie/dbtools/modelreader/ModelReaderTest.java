@@ -26,12 +26,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBDataModel;
-import de.ollie.dbtools.modelreader.models.DBIndexModel;
 import de.ollie.dbtools.modelreader.models.DBSequenceModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 
@@ -58,8 +56,7 @@ public class ModelReaderTest {
 	private static final String TABLE_NAME_1 = "TestTable";
 	private static final String TABLE_NAME_2 = "AnotherTestTable";
 
-	@InjectMocks
-	private ModelReader unitUnderTest;
+	private ModelReader unitUnderTest = new ModelReader(new DefaultDBObjectFactory());
 
 	@Rule
 	public TemporaryFolder temp = new TemporaryFolder();
@@ -121,8 +118,8 @@ public class ModelReaderTest {
 		// Prepare
 		createDatabase(this.connectionSource);
 
-		DBTableModel table = new DBTableModel(TABLE_NAME_1.toUpperCase(), new ArrayList<DBColumnModel>(),
-				new ArrayList<DBIndexModel>());
+		DBTableModel table = new DBTableModel(TABLE_NAME_1.toUpperCase(), new ArrayList<DBColumn>(),
+				new ArrayList<DBIndex>());
 		List<DBTableModel> tables = new ArrayList<>();
 		tables.add(table);
 
@@ -139,7 +136,7 @@ public class ModelReaderTest {
 		// Prepare
 		createDatabase(this.connectionSource);
 
-		List<DBColumnModel> columns = new ArrayList<>();
+		List<DBColumn> columns = new ArrayList<>();
 		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
@@ -161,7 +158,7 @@ public class ModelReaderTest {
 		// Prepare
 		createDatabaseWithTwoTables(this.connectionSource);
 
-		List<DBColumnModel> columns1 = new ArrayList<>();
+		List<DBColumn> columns1 = new ArrayList<>();
 		columns1.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
 		columns1.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
 		columns1.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
@@ -198,7 +195,7 @@ public class ModelReaderTest {
 		// Prepare
 		createDatabaseWithATableWithFieldsAllTypes(this.connectionSource);
 
-		List<DBColumnModel> columns = new ArrayList<>();
+		List<DBColumn> columns = new ArrayList<>();
 		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
@@ -237,7 +234,7 @@ public class ModelReaderTest {
 				+ COLUMN_NAME_4 + ")"); // To check, that unique indices are not respected.
 		stmt.close();
 
-		List<DBColumnModel> columns = new ArrayList<>();
+		List<DBColumn> columns = new ArrayList<>();
 		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", Types.INTEGER, -1, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", Types.VARCHAR, 100, -1));
 		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", Types.NUMERIC, 10, 2));
@@ -252,7 +249,7 @@ public class ModelReaderTest {
 
 		// Check
 		assertThat(returned.getTables().get(0).getIndices().size(), equalTo(1));
-		DBIndexModel index = returned.getTables().get(0).getIndices().get(0);
+		DBIndex index = returned.getTables().get(0).getIndices().get(0);
 		assertThat(index.getName(), equalTo(INDEX_NAME.toUpperCase()));
 		assertThat(index.getColumns().size(), equalTo(2));
 		assertThat(index.getColumns().get(0),

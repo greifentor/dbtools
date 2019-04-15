@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 
@@ -46,17 +47,13 @@ public class StatementBuilderTest {
 	@Test
 	public void createSelectStatmentString_PassATable_ReturnsASelectStatementWithAllFieldsOfTheTable() {
 		// Prepare
-		String expected = "SELECT " + COLUMN_NAME_1 + ", " + COLUMN_NAME_2
-				+ ", " + COLUMN_NAME_3 + " FROM " + TABLE_NAME_1;
-		List<DBColumnModel> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", Types.INTEGER,
-				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", Types.VARCHAR,
-				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", Types.NUMERIC,
-				10, 2));
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns,
-				new ArrayList<>());
+		String expected = "SELECT " + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3 + " FROM "
+				+ TABLE_NAME_1;
+		List<DBColumn> columns = new ArrayList<>();
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", Types.INTEGER, -1, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", Types.VARCHAR, 100, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", Types.NUMERIC, 10, 2));
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
 		String returned = this.unitUnderTest.createSelectStatementString(table);
 		// Check
@@ -66,12 +63,10 @@ public class StatementBuilderTest {
 	@Test
 	public void createSelectStatmentString_PassATableWithOutColumns_ThrowsAnException() {
 		// Prepare
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(),
-				new ArrayList<>());
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(), new ArrayList<>());
 		// Check
 		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage(
-				equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
+		this.thrown.expectMessage(equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
 
 		this.unitUnderTest.createSelectStatementString(table);
 	}
@@ -84,18 +79,13 @@ public class StatementBuilderTest {
 	@Test
 	public void createInsertStatmentString_PassATable_ReturnsAInsertStatementWithAllFieldsOfTheTable() {
 		// Prepare
-		String expected = "INSERT INTO " + TABLE_NAME_1 + " (" + COLUMN_NAME_1
-				+ ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3
-				+ ") VALUES (?, ?, ?)";
-		List<DBColumnModel> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", Types.INTEGER,
-				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", Types.VARCHAR,
-				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", Types.NUMERIC,
-				10, 2));
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns,
-				new ArrayList<>());
+		String expected = "INSERT INTO " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ", "
+				+ COLUMN_NAME_3 + ") VALUES (?, ?, ?)";
+		List<DBColumn> columns = new ArrayList<>();
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", Types.INTEGER, -1, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", Types.VARCHAR, 100, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", Types.NUMERIC, 10, 2));
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
 		String returned = this.unitUnderTest.createInsertStatementString(table);
 		// Check
@@ -105,12 +95,10 @@ public class StatementBuilderTest {
 	@Test
 	public void createInsertStatmentString_PassATableWithOutColumns_ThrowsAnException() {
 		// Prepare
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(),
-				new ArrayList<>());
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(), new ArrayList<>());
 		// Check
 		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage(
-				equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
+		this.thrown.expectMessage(equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
 
 		this.unitUnderTest.createInsertStatementString(table);
 	}
