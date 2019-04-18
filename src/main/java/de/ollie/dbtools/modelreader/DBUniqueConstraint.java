@@ -1,4 +1,4 @@
-package de.ollie.dbtools.modelreader.models;
+package de.ollie.dbtools.modelreader;
 
 /**
  * An interface for unique constraints.
@@ -6,6 +6,6 @@ package de.ollie.dbtools.modelreader.models;
  * @author Oliver.Lieshoff
  *
  */
-public class DBUniqueConstraint {
+public interface DBUniqueConstraint {
 
 }
