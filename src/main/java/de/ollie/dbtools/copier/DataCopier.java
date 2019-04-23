@@ -9,7 +9,7 @@ import java.sql.Statement;
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBTable;
 import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
-import de.ollie.dbtools.modelreader.ModelReader;
+import de.ollie.dbtools.modelreader.jdbc.JDBCModelReader;
 import de.ollie.dbtools.utils.StatementBuilder;
 
 /**
@@ -50,13 +50,13 @@ public class DataCopier {
 	 *            Set this flag to delete all data from the tables in the target
 	 *            connection. Not that only the data of those tables are deleted
 	 *            which are included by the copy process.
-	 * @throws SQLException
+	 * @throws Exception
 	 *             If an error occurs while copying the data.
 	 */
 	public void copy(Connection sourceConnection, Connection targetConnection,
-			boolean deleteBeforeCopy) throws SQLException {
-		DBDataScheme model = new ModelReader(new DefaultDBObjectFactory())
-				.readModel(sourceConnection);
+			boolean deleteBeforeCopy) throws Exception {
+		DBDataScheme model = new JDBCModelReader(new DefaultDBObjectFactory(),
+				sourceConnection).readModel();
 		for (DBTable table : model.getTables()) {
 			copyTableData(table, sourceConnection, targetConnection);
 		}

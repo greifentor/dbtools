@@ -5,7 +5,7 @@
  *
  * (c) by ollie
  */
-package de.ollie.dbtools.modelreader;
+package de.ollie.dbtools.modelreader.jdbc;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +27,11 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import de.ollie.dbtools.modelreader.DBColumn;
+import de.ollie.dbtools.modelreader.DBDataScheme;
+import de.ollie.dbtools.modelreader.DBIndex;
+import de.ollie.dbtools.modelreader.DBTable;
+import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBDataSchemeModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
@@ -37,7 +42,7 @@ import de.ollie.dbtools.modelreader.models.DBTableModel;
  * @author O.Lieshoff
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ModelReaderTest {
+public class JDBCModelReaderTest {
 
 	private static final String COLUMN_NAME_1 = "Id";
 	private static final String COLUMN_NAME_2 = "Name";
@@ -54,14 +59,13 @@ public class ModelReaderTest {
 	private static final String TABLE_NAME_1 = "TestTable";
 	private static final String TABLE_NAME_2 = "AnotherTestTable";
 
-	private ModelReader unitUnderTest = new ModelReader(
-			new DefaultDBObjectFactory());
+	private JDBCModelReader unitUnderTest = null;
 
 	@Rule
 	public TemporaryFolder temp = new TemporaryFolder();
 
 	private Connection connectionSource = null;
-
+	private DefaultDBObjectFactory factory = new DefaultDBObjectFactory();
 	private String dbNameSource = "sourceDB";
 
 	@BeforeClass
@@ -77,7 +81,9 @@ public class ModelReaderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		this.connectionSource = getConnection(dbNameSource);
+		this.connectionSource = getConnection(this.dbNameSource);
+		this.unitUnderTest = new JDBCModelReader(this.factory,
+				this.connectionSource);
 	}
 
 	private Connection getConnection(String dbName) throws Exception {
@@ -102,8 +108,7 @@ public class ModelReaderTest {
 				new ArrayList<>());
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest
-				.readModel(this.connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertEquals(expected.toString(), returned.toString());
@@ -129,8 +134,7 @@ public class ModelReaderTest {
 		tables.add(table);
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest
-				.readModel(this.connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertEquals(TABLE_NAME_1.toUpperCase(),
@@ -158,8 +162,7 @@ public class ModelReaderTest {
 				new ArrayList<>());
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest
-				.readModel(this.connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertEquals(expected.toString(), returned.toString());
@@ -196,8 +199,7 @@ public class ModelReaderTest {
 				new ArrayList<>());
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest
-				.readModel(this.connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertEquals(expected.toString(), returned.toString());
@@ -240,8 +242,7 @@ public class ModelReaderTest {
 				new ArrayList<>());
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest
-				.readModel(this.connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertEquals(expected.toString(), returned.toString());
@@ -297,7 +298,7 @@ public class ModelReaderTest {
 		tables.add(table);
 
 		// Run
-		DBDataScheme returned = this.unitUnderTest.readModel(connectionSource);
+		DBDataScheme returned = this.unitUnderTest.readModel();
 
 		// Check
 		assertThat(returned.getTables().get(0).getIndices().size(), equalTo(1));
