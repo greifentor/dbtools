@@ -9,9 +9,11 @@ package de.ollie.dbtools.modelreader;
 public interface DBColumn {
 
 	/**
-	 * Returns the size of the column or "0" if no size is defined for the column.
+	 * Returns the size of the column or "0" if no size is defined for the
+	 * column.
 	 * 
-	 * @return The size of the column or "0" if no size is defined for the column.
+	 * @return The size of the column or "0" if no size is defined for the
+	 *         column.
 	 */
 	int getColumnSize();
 
@@ -34,7 +36,7 @@ public interface DBColumn {
 	 *
 	 * @return The "Types" type of the field.
 	 */
-	int getType();
+	DBType getType();
 
 	/**
 	 * Returns a human readable name of the fields type.

@@ -21,6 +21,7 @@ import de.ollie.dbtools.modelreader.DBIndex;
 import de.ollie.dbtools.modelreader.DBObjectFactory;
 import de.ollie.dbtools.modelreader.DBSequence;
 import de.ollie.dbtools.modelreader.DBTable;
+import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.ModelReader;
 
 /**
@@ -31,6 +32,7 @@ import de.ollie.dbtools.modelreader.ModelReader;
 public class JDBCModelReader implements ModelReader {
 
 	private DBObjectFactory factory;
+	private DBTypeConverter typeConverter;
 	private Connection connection;
 
 	/**
@@ -38,15 +40,19 @@ public class JDBCModelReader implements ModelReader {
 	 *
 	 * @param factory
 	 *            An object factory implementation to create the DB objects.
+	 * @param typeConverter
+	 *            A converter for database types.
 	 * @param connection
 	 *            The connection whose data model should be read.
 	 * @throws IllegalArgumentException
 	 *             Passing null value.
 	 */
-	public JDBCModelReader(DBObjectFactory factory, Connection connection) {
+	public JDBCModelReader(DBObjectFactory factory,
+			DBTypeConverter typeConverter, Connection connection) {
 		super();
 		this.connection = connection;
 		this.factory = factory;
+		this.typeConverter = typeConverter;
 	}
 
 	@Override
@@ -100,8 +106,10 @@ public class JDBCModelReader implements ModelReader {
 						|| (dataType == Types.NUMERIC)) {
 					decimalDigits = rs.getInt("DECIMAL_DIGITS");
 				}
-				table.getColumns().add(this.factory.createColumn(columnName,
-						typeName, dataType, columnSize, decimalDigits));
+				table.getColumns()
+						.add(this.factory.createColumn(columnName, typeName,
+								this.typeConverter.convert(dataType),
+								columnSize, decimalDigits));
 			}
 			rs.close();
 		}

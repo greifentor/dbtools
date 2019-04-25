@@ -25,7 +25,7 @@ public interface DBObjectFactory {
 	 * @param decimalDigits
 	 *            The count of the decimal digits.
 	 */
-	DBColumn createColumn(String columnName, String typeName, int dataType,
+	DBColumn createColumn(String columnName, String typeName, DBType dataType,
 			int columnSize, int decimalDigits);
 
 	/**

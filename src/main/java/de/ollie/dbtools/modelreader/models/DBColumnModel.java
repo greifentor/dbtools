@@ -1,6 +1,7 @@
 package de.ollie.dbtools.modelreader.models;
 
 import de.ollie.dbtools.modelreader.DBColumn;
+import de.ollie.dbtools.modelreader.DBType;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class DBColumnModel implements DBColumn {
 	private String name;
 	@NonNull
 	private String typeName;
-	private int type;
+	private DBType type;
 	private int columnSize;
 	private int decimalDigits;
 

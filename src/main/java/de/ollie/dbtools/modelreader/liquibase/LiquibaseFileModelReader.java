@@ -9,6 +9,8 @@ import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBObjectFactory;
 import de.ollie.dbtools.modelreader.DBTable;
+import de.ollie.dbtools.modelreader.DBType;
+import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.ModelReader;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -32,6 +34,7 @@ import liquibase.resource.ResourceAccessor;
 public class LiquibaseFileModelReader implements ModelReader {
 
 	private DBObjectFactory factory;
+	private DBTypeConverter typesConverter;
 	private File baseDirectory;
 	private File rootFile;
 
@@ -40,6 +43,8 @@ public class LiquibaseFileModelReader implements ModelReader {
 	 *
 	 * @param factory
 	 *            An object factory implementation to create the DB objects.
+	 * @param typeConverter
+	 *            A converter for the types.
 	 * @param baseDirectory
 	 *            The directory which contains the base XML file of the model.
 	 * @param rootFile
@@ -47,12 +52,13 @@ public class LiquibaseFileModelReader implements ModelReader {
 	 * @throws IllegalArgumentException
 	 *             Passing null value.
 	 */
-	public LiquibaseFileModelReader(DBObjectFactory factory, File baseDirectory,
-			File rootFile) {
+	public LiquibaseFileModelReader(DBObjectFactory factory,
+			DBTypeConverter typesConverter, File baseDirectory, File rootFile) {
 		super();
 		this.baseDirectory = baseDirectory;
 		this.factory = factory;
 		this.rootFile = rootFile;
+		this.typesConverter = typesConverter;
 	}
 
 	@Override
@@ -94,10 +100,14 @@ public class LiquibaseFileModelReader implements ModelReader {
 		for (ColumnConfig cc : columnConfigs) {
 			TypeInfo type = getDataType(cc);
 			columns.add(this.factory.createColumn(cc.getName(), type.getName(),
-					type.getDataType(), type.getColumnSize(),
+					getDBType(type.getDataType()), type.getColumnSize(),
 					type.getDecimalDigits()));
 		}
 		return columns;
+	}
+
+	private DBType getDBType(int dataType) {
+		return typesConverter.convert(dataType);
 	}
 
 	// TODO: Types should be managed by special classes (independent from the

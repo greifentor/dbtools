@@ -8,6 +8,7 @@ import java.sql.Statement;
 
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBTable;
+import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
 import de.ollie.dbtools.modelreader.jdbc.JDBCModelReader;
 import de.ollie.dbtools.utils.StatementBuilder;
@@ -56,7 +57,7 @@ public class DataCopier {
 	public void copy(Connection sourceConnection, Connection targetConnection,
 			boolean deleteBeforeCopy) throws Exception {
 		DBDataScheme model = new JDBCModelReader(new DefaultDBObjectFactory(),
-				sourceConnection).readModel();
+				new DBTypeConverter(), sourceConnection).readModel();
 		for (DBTable table : model.getTables()) {
 			copyTableData(table, sourceConnection, targetConnection);
 		}

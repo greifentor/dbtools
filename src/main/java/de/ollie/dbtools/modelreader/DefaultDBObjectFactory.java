@@ -17,7 +17,7 @@ public class DefaultDBObjectFactory implements DBObjectFactory {
 
 	@Override
 	public DBColumn createColumn(String columnName, String typeName,
-			int dataType, int columnSize, int decimalDigits) {
+			DBType dataType, int columnSize, int decimalDigits) {
 		return new DBColumnModel(columnName, typeName, dataType, columnSize,
 				decimalDigits);
 	}

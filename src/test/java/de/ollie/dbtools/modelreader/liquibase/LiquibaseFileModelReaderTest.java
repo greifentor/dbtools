@@ -8,7 +8,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +21,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBTable;
+import de.ollie.dbtools.modelreader.DBType;
+import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBDataSchemeModel;
@@ -62,6 +63,7 @@ public class LiquibaseFileModelReaderTest {
 	private Path pathMasterFile = null;
 	private Path pathTicket1File = null;
 	private Path pathVersionMasterFile = null;
+	private DBTypeConverter typesConverter = new DBTypeConverter();
 
 	private static final String CHANGE_LOG_MASTER_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			+ "<databaseChangeLog\n"
@@ -114,7 +116,7 @@ public class LiquibaseFileModelReaderTest {
 				Paths.get(ticketFolder.getAbsolutePath(), "Ticket-1.xml"));
 		Files.write(this.pathTicket1File, TICKET_1_CONTENT.getBytes());
 		this.unitUnderTest = new LiquibaseFileModelReader(this.factory,
-				baseFolder, this.pathMasterFile.toFile());
+				this.typesConverter, baseFolder, this.pathMasterFile.toFile());
 	}
 
 	@Test
@@ -135,11 +137,11 @@ public class LiquibaseFileModelReaderTest {
 			throws Exception {
 		// Vorbereitung
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", Types.INTEGER,
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER,
 				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", Types.VARCHAR,
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR,
 				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", Types.NUMERIC,
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC,
 				10, 2));
 		DBTable table = new DBTableModel(TABLE_NAME_1, columns,
 				new ArrayList<>());
