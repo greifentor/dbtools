@@ -8,6 +8,6 @@ package de.ollie.dbtools.modelreader;
  */
 public enum DBType {
 
-	BIGINT, CHAR, DECIMAL, INTEGER, NUMERIC, VARCHAR;
+	BIGINT, BIT, CHAR, DATE, DECIMAL, INTEGER, NUMERIC, TIMESTAMP, VARCHAR;
 
 }

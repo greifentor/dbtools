@@ -22,14 +22,20 @@ public class DBTypeConverter {
 	public DBType convert(int dataType) {
 		if (dataType == Types.BIGINT) {
 			return DBType.BIGINT;
+		} else if (dataType == Types.BIT) {
+			return DBType.BIT;
 		} else if (dataType == Types.CHAR) {
 			return DBType.CHAR;
+		} else if (dataType == Types.DATE) {
+			return DBType.DATE;
 		} else if (dataType == Types.DECIMAL) {
 			return DBType.DECIMAL;
 		} else if (dataType == Types.INTEGER) {
 			return DBType.INTEGER;
 		} else if (dataType == Types.NUMERIC) {
 			return DBType.NUMERIC;
+		} else if (dataType == Types.TIMESTAMP) {
+			return DBType.TIMESTAMP;
 		} else if (dataType == Types.VARCHAR) {
 			return DBType.VARCHAR;
 		}
