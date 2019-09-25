@@ -12,6 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +35,24 @@ public class JDBCModelReader implements ModelReader {
 	private DBObjectFactory factory;
 	private DBTypeConverter typeConverter;
 	private Connection connection;
+	private String schemeName;
 
 	/**
 	 * Creates a new model reader with the passed parameters.
 	 *
-	 * @param factory
-	 *            An object factory implementation to create the DB objects.
-	 * @param typeConverter
-	 *            A converter for database types.
-	 * @param connection
-	 *            The connection whose data model should be read.
-	 * @throws IllegalArgumentException
-	 *             Passing null value.
+	 * @param factory       An object factory implementation to create the DB objects.
+	 * @param typeConverter A converter for database types.
+	 * @param connection    The connection whose data model should be read.
+	 * @param schemeName    The name of the scheme whose data are to read (pass "null" to ignore scheme and load all
+	 *                      tables).
+	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public JDBCModelReader(DBObjectFactory factory,
-			DBTypeConverter typeConverter, Connection connection) {
+	public JDBCModelReader(DBObjectFactory factory, DBTypeConverter typeConverter, Connection connection,
+			String schemeName) {
 		super();
 		this.connection = connection;
 		this.factory = factory;
+		this.schemeName = schemeName;
 		this.typeConverter = typeConverter;
 	}
 
@@ -70,64 +71,68 @@ public class JDBCModelReader implements ModelReader {
 		return new ArrayList<>(tables);
 	}
 
-	private List<DBTable> readTables(DatabaseMetaData dbmd)
-			throws SQLException {
+	private List<DBTable> readTables(DatabaseMetaData dbmd) throws SQLException {
 		List<DBTable> tables = new ArrayList<>();
-		ResultSet rs = dbmd.getTables(null, null, null,
-				new String[]{"TABLE", "VIEW"});
+		ResultSet rs = dbmd.getTables(null, this.schemeName, "%", new String[] { "TABLE" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
-			tables.add(this.factory.createTable(tableName, new ArrayList<>(),
-					new ArrayList<>()));
+			tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
+			System.out
+					.println(LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
 		}
 		rs.close();
 		return tables;
 	}
 
-	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables)
-			throws SQLException {
+	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {
 		for (DBTable table : tables) {
-			ResultSet rs = dbmd.getColumns(null, null, table.getName(), "%");
+			System.out.println(LocalDateTime.now() + " - reading columns for table: " + table.getName());
+			ResultSet rs = dbmd.getColumns(null, this.schemeName, table.getName(), "%");
 			while (rs.next()) {
 				String columnName = rs.getString("COLUMN_NAME");
 				String typeName = rs.getString("TYPE_NAME");
 				int dataType = rs.getInt("DATA_TYPE");
 				int columnSize = -1;
 				int decimalDigits = -1;
-				if ((dataType == Types.CHAR) || (dataType == Types.DECIMAL)
-						|| (dataType == Types.FLOAT)
-						|| (dataType == Types.LONGVARCHAR)
-						|| (dataType == Types.NUMERIC)
-						|| (dataType == Types.VARBINARY)
-						|| (dataType == Types.VARCHAR)) {
+				if ((dataType == Types.CHAR) || (dataType == Types.DECIMAL) || (dataType == Types.FLOAT)
+						|| (dataType == Types.LONGVARCHAR) || (dataType == Types.NUMERIC)
+						|| (dataType == Types.VARBINARY) || (dataType == Types.VARCHAR)) {
 					columnSize = rs.getInt("COLUMN_SIZE");
 				}
-				if ((dataType == Types.DECIMAL)
-						|| (dataType == Types.NUMERIC)) {
+				if ((dataType == Types.DECIMAL) || (dataType == Types.NUMERIC)) {
 					decimalDigits = rs.getInt("DECIMAL_DIGITS");
 				}
-				table.getColumns()
-						.add(this.factory.createColumn(columnName, typeName,
-								this.typeConverter.convert(dataType),
-								columnSize, decimalDigits));
+				try {
+					table.getColumns().add(this.factory.createColumn(columnName, typeName,
+							this.typeConverter.convert(dataType), columnSize, decimalDigits));
+				} catch (Exception e) {
+					System.out.println(
+							"Problems while reading column '" + rs.getString("TABLE_SCHEM") + "." + table.getName()
+									+ "." + columnName + "' (" + typeName + " {" + dataType + "}): " + e.getMessage());
+				}
 			}
 			rs.close();
 		}
 	}
 
-	private void loadIndices(DatabaseMetaData dbmd, List<DBTable> tables)
-			throws SQLException {
+	private void loadIndices(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {
 		for (DBTable table : tables) {
-			ResultSet rs = dbmd.getIndexInfo(null, null, table.getName(), false,
-					false);
+			System.out.println(LocalDateTime.now() + " - reading indices for table: " + table.getName());
+			// TODO: Set "false, false" to "true, true" for large oracle tables.
+			ResultSet rs = dbmd.getIndexInfo(null, this.schemeName, table.getName(), false, false);
 			while (rs.next()) {
 				boolean nonUniqueIndex = rs.getBoolean("NON_UNIQUE");
 				if (nonUniqueIndex) {
 					String indexName = rs.getString("INDEX_NAME");
 					String columnName = rs.getString("COLUMN_NAME");
-					DBIndex index = getIndexByName(indexName, table);
-					DBColumn column = getColumnByName(columnName, table);
-					index.getColumns().add(column);
+					try {
+						DBIndex index = getIndexByName(indexName, table);
+						DBColumn column = getColumnByName(columnName, table);
+						index.getColumns().add(column);
+					} catch (IllegalArgumentException iae) {
+						System.out.println(
+								LocalDateTime.now() + " - Index '" + indexName + "'not added: " + iae.getMessage());
+					}
 				}
 			}
 			rs.close();
@@ -151,12 +156,10 @@ public class JDBCModelReader implements ModelReader {
 				return column;
 			}
 		}
-		throw new IllegalArgumentException("column '" + name
-				+ "' does not exist in table '" + table.getName() + "'.");
+		throw new IllegalArgumentException("column '" + name + "' does not exist in table '" + table.getName() + "'.");
 	}
 
-	private List<DBSequence> getSequences(DatabaseMetaData dbmd)
-			throws SQLException {
+	private List<DBSequence> getSequences(DatabaseMetaData dbmd) throws SQLException {
 		List<DBSequence> sequences = new ArrayList<>();
 		return sequences;
 	}
