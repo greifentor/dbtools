@@ -40,9 +40,9 @@ public class CopyCommand implements Command {
 	private String sourceUserName;
 
 	@Parameter(names = {
-			"--sourcePassword" }, required = true, description = "The password of the user for source database "
+			"--sourcePassword" }, required = false, description = "The password of the user for source database "
 					+ "access.")
-	private String sourceUserPassword;
+	private String sourceUserPassword = "";
 
 	@Parameter(names = {
 			"--targetDriver" }, required = true, description = "The qualified class name of the JDBC driver for the "
@@ -57,9 +57,9 @@ public class CopyCommand implements Command {
 	private String targetUserName;
 
 	@Parameter(names = {
-			"--targetPassword" }, required = true, description = "The password of the user for target database "
+			"--targetPassword" }, required = false, description = "The password of the user for target database "
 					+ "access.")
-	private String targetUserPassword;
+	private String targetUserPassword = "";
 
 	@Parameter(names = { "--tableNamePattern" }, required = false, description = "A pattern for table names whose data "
 			+ "are to copy (set '*' for variable start or end of the table names). More than one pattern could be "
