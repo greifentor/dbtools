@@ -28,7 +28,7 @@ public class Counter {
 	 */
 	public static void countAllRecords(Connection connection, String schemeName) throws Exception {
 		DBDataScheme scheme = new JDBCModelReader(new DefaultDBObjectFactory(), new DBTypeConverter(), connection,
-				schemeName).readModel();
+				schemeName, null).readModel();
 		int maxlen = 0;
 		for (DBTable table : scheme.getTables()) {
 			maxlen = Math.max(maxlen, table.getName().length());

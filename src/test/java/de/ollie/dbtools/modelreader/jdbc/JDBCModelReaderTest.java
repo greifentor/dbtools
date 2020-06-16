@@ -7,7 +7,6 @@
  */
 package de.ollie.dbtools.modelreader.jdbc;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -15,7 +14,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +86,8 @@ public class JDBCModelReaderTest {
 	@Before
 	public void setUp() throws Exception {
 		this.connectionSource = getConnection(this.dbNameSource);
-		this.unitUnderTest = new JDBCModelReader(this.factory, this.typeConverter, this.connectionSource, null);
+		this.unitUnderTest = new JDBCModelReader(this.factory, this.typeConverter, this.connectionSource, null,
+				Arrays.asList("*"));
 	}
 
 	private Connection getConnection(String dbName) throws Exception {

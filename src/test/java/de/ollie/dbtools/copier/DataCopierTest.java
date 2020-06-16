@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,9 +65,7 @@ public class DataCopierTest {
 
 	private Connection getConnection(String dbName) throws Exception {
 		return DriverManager.getConnection(
-				"jdbc:hsqldb:file:" + temp.getRoot().getAbsolutePath() + "/"
-						+ dbName + ";shutdown=true",
-				"SA", "");
+				"jdbc:hsqldb:file:" + temp.getRoot().getAbsolutePath() + "/" + dbName + ";shutdown=true", "SA", "");
 	}
 
 	@After
@@ -80,42 +79,36 @@ public class DataCopierTest {
 	}
 
 	@Test
-	public void copy_PassSourceAndTargetConnection_DatabaseContentCopied()
-			throws Exception {
+	public void copy_PassSourceAndTargetConnection_DatabaseContentCopied() throws Exception {
 		// Prepare
 		createDatabase(this.connectionSource);
 		createDatabase(this.connectionTarget);
 		insertData(this.connectionSource, 1, "eins", 1.11111F);
 		insertData(this.connectionSource, 2, "zwei", 2.2F);
 		// Run
-		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget,
-				true);
+		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"));
 		// Check
 		assertThat(count(this.connectionTarget), equalTo(2));
 	}
 
 	private void createDatabase(Connection connection) throws Exception {
 		Statement stmt = connection.createStatement();
-		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1
-				+ " INTEGER, " + COLUMN_NAME_2 + " VARCHAR(100), "
-				+ COLUMN_NAME_3 + " NUMERIC(10,2))");
+		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2))");
 		stmt.close();
 	}
 
-	private void insertData(Connection connection, Integer i, String s, Float f)
-			throws Exception {
+	private void insertData(Connection connection, Integer i, String s, Float f) throws Exception {
 		Statement stmt = connection.createStatement();
-		stmt.execute("INSERT INTO " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + ", "
-				+ COLUMN_NAME_2 + ", " + COLUMN_NAME_3 + ") VALUES (" + i + ", "
-				+ (s == null ? "null" : "'" + s + "'") + ", " + f + ")");
+		stmt.execute("INSERT INTO " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3
+				+ ") VALUES (" + i + ", " + (s == null ? "null" : "'" + s + "'") + ", " + f + ")");
 		stmt.close();
 	}
 
 	private int count(Connection connection) throws Exception {
 		int count = 0;
 		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt
-				.executeQuery("SELECT COUNT(*) FROM " + TABLE_NAME_1);
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_NAME_1);
 		if (rs.next()) {
 			count = rs.getInt(1);
 		}

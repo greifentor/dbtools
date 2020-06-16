@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBTable;
@@ -41,16 +42,18 @@ public class DataCopier {
 	 * <B>Note:</B> the data schemes of the two databases referenced by the connection should be equal. In minimum the
 	 * tables and fields of the source database must be members of the target database.
 	 * 
-	 * @param sourceConnection The connection which the data are read from.
-	 * @param targetConnection The connection which the data are to write into.
-	 * @param deleteBeforeCopy Set this flag to delete all data from the tables in the target connection. Not that only
-	 *                         the data of those tables are deleted which are included by the copy process.
+	 * @param sourceConnection         The connection which the data are read from.
+	 * @param targetConnection         The connection which the data are to write into.
+	 * @param deleteBeforeCopy         Set this flag to delete all data from the tables in the target connection. Not
+	 *                                 that only the data of those tables are deleted which are included by the copy
+	 *                                 process.
+	 * @param includeTableNamePatterns A list with the table name patterns. Only one have to match to import a table.
 	 * @throws Exception If an error occurs while copying the data.
 	 */
-	public void copy(Connection sourceConnection, Connection targetConnection, boolean deleteBeforeCopy)
-			throws Exception {
+	public void copy(Connection sourceConnection, Connection targetConnection, boolean deleteBeforeCopy,
+			List<String> includeTableNamePatterns) throws Exception {
 		DBDataScheme model = new JDBCModelReader(new DefaultDBObjectFactory(), new DBTypeConverter(), sourceConnection,
-				null).readModel();
+				null, includeTableNamePatterns).readModel();
 		for (DBTable table : model.getTables()) {
 			copyTableData(table, sourceConnection, targetConnection);
 		}

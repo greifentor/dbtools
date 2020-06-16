@@ -32,26 +32,29 @@ import de.ollie.dbtools.modelreader.ModelReader;
  */
 public class JDBCModelReader implements ModelReader {
 
-	private DBObjectFactory factory;
-	private DBTypeConverter typeConverter;
 	private Connection connection;
+	private DBObjectFactory factory;
+	private List<String> includeTableNamePatterns;
 	private String schemeName;
+	private DBTypeConverter typeConverter;
 
 	/**
 	 * Creates a new model reader with the passed parameters.
 	 *
-	 * @param factory       An object factory implementation to create the DB objects.
-	 * @param typeConverter A converter for database types.
-	 * @param connection    The connection whose data model should be read.
-	 * @param schemeName    The name of the scheme whose data are to read (pass "null" to ignore scheme and load all
-	 *                      tables).
+	 * @param factory                  An object factory implementation to create the DB objects.
+	 * @param typeConverter            A converter for database types.
+	 * @param connection               The connection whose data model should be read.
+	 * @param schemeName               The name of the scheme whose data are to read (pass "null" to ignore scheme and
+	 *                                 load all tables).
+	 * @param includeTableNamePatterns A list with the table name patterns. Only one have to match to import a table.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
 	public JDBCModelReader(DBObjectFactory factory, DBTypeConverter typeConverter, Connection connection,
-			String schemeName) {
+			String schemeName, List<String> includeTableNamePatterns) {
 		super();
 		this.connection = connection;
 		this.factory = factory;
+		this.includeTableNamePatterns = includeTableNamePatterns;
 		this.schemeName = schemeName;
 		this.typeConverter = typeConverter;
 	}
@@ -76,12 +79,27 @@ public class JDBCModelReader implements ModelReader {
 		ResultSet rs = dbmd.getTables(null, this.schemeName, "%", new String[] { "TABLE" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
-			tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
-			System.out
-					.println(LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
+			if (isMatchingImportOnlyPattern(tableName)) {
+				tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
+				System.out.println(
+						LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
+			}
 		}
 		rs.close();
 		return tables;
+	}
+
+	private boolean isMatchingImportOnlyPattern(String tableName) {
+		for (String pattern : this.includeTableNamePatterns) {
+			if (pattern.equals("*") || pattern.equals(tableName)
+					|| (pattern.startsWith("*") && pattern.endsWith("*")
+							&& tableName.contains(pattern.substring(1, pattern.length() - 1))) //
+					|| (pattern.startsWith("*") && tableName.endsWith(pattern.substring(1))) //
+					|| (pattern.endsWith("*") && tableName.startsWith(pattern.substring(0, pattern.length() - 1)))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {
