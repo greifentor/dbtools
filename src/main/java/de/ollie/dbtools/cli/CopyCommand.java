@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -25,7 +26,7 @@ import de.ollie.dbtools.utils.StatementBuilder;
 @Parameters(commandDescription = "Copies contents of databases from one database to another.")
 public class CopyCommand implements Command {
 
-	static Logger log = Logger.getLogger(CopyCommand.class);
+	static Logger log = LogManager.getLogger(CopyCommand.class);
 
 	@Parameter(names = {
 			"--sourceDriver" }, required = true, description = "The qualified class name of the JDBC driver for the "

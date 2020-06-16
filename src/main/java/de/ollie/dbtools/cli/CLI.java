@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
@@ -20,7 +21,7 @@ import lombok.Getter;
  */
 public class CLI {
 
-	static Logger log = Logger.getLogger(CLI.class);
+	static Logger log = LogManager.getLogger(CLI.class);
 
 	@Getter
 	@Parameters(commandDescription = "A main command for the common options.")
