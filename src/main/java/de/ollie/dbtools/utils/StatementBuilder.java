@@ -16,17 +16,14 @@ public class StatementBuilder {
 	/**
 	 * Build a select statement string for the passed table model.
 	 *
-	 * @param table
-	 *            The table model which the statement is to build for.
+	 * @param table The table model which the statement is to build for.
 	 * @return A select statement for the passed table model.
-	 * @throws NullPointerException
-	 *             Passing a null value as table.
+	 * @throws NullPointerException Passing a null value as table.
 	 */
 	public String createSelectStatementString(DBTable table) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Table '" + table.getName() + "' has no columns.");
+			throw new IllegalArgumentException("Table '" + table.getName() + "' has no columns.");
 		}
 		StringBuilder sb = new StringBuilder("");
 		for (DBColumn column : table.getColumns()) {
@@ -42,27 +39,36 @@ public class StatementBuilder {
 	}
 
 	/**
-	 * Build an insert statement string for the passed table model with '?'
-	 * characters instead of values.
+	 * Build an insert statement string for the passed table model with '?' characters instead of values.
 	 *
-	 * @param table
-	 *            The table model which the statement is to build for.
+	 * @param table The table model which the statement is to build for.
 	 * @return An insert statement for the passed table model.
-	 * @throws NullPointerException
-	 *             Passing a null value as table.
+	 * @throws NullPointerException Passing a null value as table.
 	 */
 	public String createInsertStatementString(DBTable table) {
+		return createInsertStatementString(table, null);
+	}
+
+	/**
+	 * Build an insert statement string for the passed table model with '?' characters instead of values.
+	 *
+	 * @param table                The table model which the statement is to build for.
+	 * @param alternativeTableName An alternative table name.
+	 * @return An insert statement for the passed table model.
+	 * @throws NullPointerException Passing a null value as table.
+	 */
+	public String createInsertStatementString(DBTable table, String alternativeTableName) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Table '" + table.getName() + "' has no columns.");
+			throw new IllegalArgumentException("Table '" + table.getName() + "' has no columns.");
 		}
 		StringBuilder sb = new StringBuilder("");
 		for (DBColumn column : table.getColumns()) {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			} else {
-				sb.append("INSERT INTO ").append(table.getName()).append(" (");
+				sb.append("INSERT INTO ").append(alternativeTableName != null ? alternativeTableName : table.getName())
+						.append(" (");
 			}
 			sb.append(column.getName());
 		}

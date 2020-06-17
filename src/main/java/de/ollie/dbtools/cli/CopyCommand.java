@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -68,7 +70,13 @@ public class CopyCommand implements Command {
 			+ "is '*'; this will match all table names).")
 	private String tableNamePattern = "*";
 
+	@Parameter(names = { "--tableNameMappings" }, required = false, description = "Mappings for table names which are "
+			+ "differing in source and target data scheme. Type a comma separated list of "
+			+ "'sourceTableName=targetTableName' with this parameter.")
+	private String tableNameMappings;
+
 	@Override
+
 	public String getCommand() {
 		return "copy";
 	}
@@ -77,12 +85,13 @@ public class CopyCommand implements Command {
 	public int run(MainParameters mainCommand) {
 		try {
 			List<String> includeTableNamePatterns = getIncludes(tableNamePattern);
+			Map<String, String> mapTableNameMappings = getTableNameMappings(tableNameMappings);
 			Connection sourceConnection = getConnection(sourceDriverClassName, sourceURL, sourceUserName,
 					sourceUserPassword);
 			Connection targetConnection = getConnection(targetDriverClassName, targetURL, targetUserName,
 					targetUserPassword);
 			new DataCopier(new StatementBuilder()).copy(sourceConnection, targetConnection, true,
-					includeTableNamePatterns);
+					includeTableNamePatterns, mapTableNameMappings);
 		} catch (Exception e) {
 			log.error("error while copying data: " + e.getMessage(), e);
 		}
@@ -94,6 +103,20 @@ public class CopyCommand implements Command {
 			return Arrays.asList("*");
 		}
 		return Arrays.asList(StringUtils.split(includeTableNamePatterns, ','));
+	}
+
+	private Map<String, String> getTableNameMappings(String s) {
+		Map<String, String> m = new HashMap<>();
+		if (s != null) {
+			for (String mapping : StringUtils.split(s, ',')) {
+				if (!mapping.contains("=")) {
+					throw new IllegalStateException("'" + mapping + "' is not a valid table name mapping.");
+				}
+				String[] tableName = StringUtils.split(s, '=');
+				m.put(tableName[0], tableName[1]);
+			}
+		}
+		return m;
 	}
 
 	private Connection getConnection(String driverClassName, String url, String userName, String userPassword)

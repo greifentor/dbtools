@@ -8,6 +8,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,19 +83,19 @@ public class DataCopierTest {
 	@Test
 	public void copy_PassSourceAndTargetConnection_DatabaseContentCopied() throws Exception {
 		// Prepare
-		createDatabase(this.connectionSource);
-		createDatabase(this.connectionTarget);
+		createDatabase(this.connectionSource, TABLE_NAME_1);
+		createDatabase(this.connectionTarget, TABLE_NAME_1);
 		insertData(this.connectionSource, 1, "eins", 1.11111F);
 		insertData(this.connectionSource, 2, "zwei", 2.2F);
 		// Run
-		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"));
+		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"), null);
 		// Check
-		assertThat(count(this.connectionTarget), equalTo(2));
+		assertThat(count(this.connectionTarget, TABLE_NAME_1), equalTo(2));
 	}
 
-	private void createDatabase(Connection connection) throws Exception {
+	private void createDatabase(Connection connection, String tableName) throws Exception {
 		Statement stmt = connection.createStatement();
-		stmt.execute("CREATE TABLE " + TABLE_NAME_1 + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
+		stmt.execute("CREATE TABLE " + tableName + " (" + COLUMN_NAME_1 + " INTEGER, " + COLUMN_NAME_2
 				+ " VARCHAR(100), " + COLUMN_NAME_3 + " NUMERIC(10,2))");
 		stmt.close();
 	}
@@ -105,16 +107,33 @@ public class DataCopierTest {
 		stmt.close();
 	}
 
-	private int count(Connection connection) throws Exception {
+	private int count(Connection connection, String tableName) throws Exception {
 		int count = 0;
 		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE_NAME_1);
+		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + tableName);
 		if (rs.next()) {
 			count = rs.getInt(1);
 		}
 		rs.close();
 		stmt.close();
 		return count;
+	}
+
+	@Test
+	public void copy_PassSourceAndTargetConnectionWithTableNameMapping_DatabaseContentCopied() throws Exception {
+		// Prepare
+		String pappnase = "PAPPNASE";
+		createDatabase(this.connectionSource, TABLE_NAME_1);
+		createDatabase(this.connectionTarget, pappnase);
+		insertData(this.connectionSource, 1, "eins", 1.11111F);
+		insertData(this.connectionSource, 2, "zwei", 2.2F);
+		Map<String, String> tableNameMapping = new HashMap<>();
+		tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
+		// Run
+		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"),
+				tableNameMapping);
+		// Check
+		assertThat(count(this.connectionTarget, pappnase), equalTo(2));
 	}
 
 }
