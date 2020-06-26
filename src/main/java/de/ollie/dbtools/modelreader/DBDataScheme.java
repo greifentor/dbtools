@@ -1,6 +1,7 @@
 package de.ollie.dbtools.modelreader;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An interface for data schemes.
@@ -9,6 +10,10 @@ import java.util.List;
  *
  */
 public interface DBDataScheme {
+
+	void addTables(DBTable... dbTables);
+
+	Optional<DBTable> getTableByName(String name);
 
 	/**
 	 * Returns the tables of the data scheme.

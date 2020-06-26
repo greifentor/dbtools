@@ -24,6 +24,8 @@ public class DBTypeConverter {
 			return DBType.BIT;
 		} else if (dataType == Types.BLOB) {
 			return DBType.BLOB;
+		} else if (dataType == Types.BOOLEAN) {
+			return DBType.BOOLEAN;
 		} else if (dataType == Types.CHAR) {
 			return DBType.CHAR;
 		} else if (dataType == Types.CLOB) {

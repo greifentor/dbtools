@@ -66,7 +66,7 @@ public class LiquibaseFileModelReaderTest {
 	private DBTypeConverter typesConverter = new DBTypeConverter();
 
 	private static final String CHANGE_LOG_MASTER_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<databaseChangeLog\n"
+			+ "<databaseChangeLog\n" //
 			+ "        xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n"
 			+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
 			+ "        xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n"
@@ -86,17 +86,17 @@ public class LiquibaseFileModelReaderTest {
 			+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\r\n"
 			+ "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
 			+ "                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd\">\r\n"
-			+ "    <changeSet author=\"Oliver.Lieshoff\" id=\"Ticket-1\">\r\n"
-			+ "        <createTable tableName=\"" + TABLE_NAME_1 + "\">\r\n"
-			+ "            <column name=\"" + COLUMN_NAME_1
-			+ "\" type=\"INTEGER\">\r\n"
-			+ "                <constraints primaryKey=\"true\" primaryKeyName=\""
-			+ TABLE_1_PRIMARY_KEY + "_pkey\"/>\r\n"
-			+ "            </column>\r\n" + "            <column name=\""
-			+ COLUMN_NAME_2 + "\" type=\"VARCHAR(100)\"/>\r\n"
-			+ "            <column name=\"" + COLUMN_NAME_3
-			+ "\" type=\"NUMERIC(10,2)\"/>\r\n" + "        </createTable>\r\n"
-			+ "    </changeSet>\r\n" + "</databaseChangeLog>";
+			+ "    <changeSet author=\"Oliver.Lieshoff\" id=\"Ticket-1\">\r\n" //
+			+ "        <createTable tableName=\"" + TABLE_NAME_1 + "\">\r\n" //
+			+ "            <column name=\"" + COLUMN_NAME_1 + "\" type=\"INTEGER\">\r\n" //
+			+ "                <constraints primaryKey=\"true\" primaryKeyName=\"" + TABLE_1_PRIMARY_KEY
+			+ "_pkey\"/>\r\n" //
+			+ "            </column>\r\n" //
+			+ "            <column name=\"" + COLUMN_NAME_2 + "\" type=\"VARCHAR(100)\"/>\r\n" //
+			+ "            <column name=\"" + COLUMN_NAME_3 + "\" type=\"NUMERIC(10,2)\"/>\r\n" ///
+			+ "        </createTable>\r\n" //
+			+ "    </changeSet>\r\n" //
+			+ "</databaseChangeLog>";
 
 	@Before
 	public void setUp() throws Exception {
@@ -105,50 +105,37 @@ public class LiquibaseFileModelReaderTest {
 		versionFolder.mkdirs();
 		File ticketFolder = new File(versionFolder, "Ticket-1");
 		ticketFolder.mkdirs();
-		this.pathMasterFile = Files.createFile(
-				Paths.get(baseFolder.getAbsolutePath(), "master.xml"));
+		this.pathMasterFile = Files.createFile(Paths.get(baseFolder.getAbsolutePath(), "master.xml"));
 		Files.write(this.pathMasterFile, CHANGE_LOG_MASTER_CONTENT.getBytes());
-		this.pathVersionMasterFile = Files.createFile(Paths
-				.get(versionFolder.getAbsolutePath(), "version-master.xml"));
-		Files.write(this.pathVersionMasterFile,
-				VERSION_MASTER_CONTENT.getBytes());
-		this.pathTicket1File = Files.createFile(
-				Paths.get(ticketFolder.getAbsolutePath(), "Ticket-1.xml"));
+		this.pathVersionMasterFile = Files.createFile(Paths.get(versionFolder.getAbsolutePath(), "version-master.xml"));
+		Files.write(this.pathVersionMasterFile, VERSION_MASTER_CONTENT.getBytes());
+		this.pathTicket1File = Files.createFile(Paths.get(ticketFolder.getAbsolutePath(), "Ticket-1.xml"));
 		Files.write(this.pathTicket1File, TICKET_1_CONTENT.getBytes());
-		this.unitUnderTest = new LiquibaseFileModelReader(this.factory,
-				this.typesConverter, baseFolder, this.pathMasterFile.toFile());
+		this.unitUnderTest = new LiquibaseFileModelReader(this.factory, this.typesConverter, baseFolder,
+				this.pathMasterFile.toFile());
 	}
 
 	@Test
 	public void temporaryFilesAreCreatedProperly() throws Exception {
 		assertThat(this.pathMasterFile.toFile().exists(), equalTo(true));
-		assertThat(CHANGE_LOG_MASTER_CONTENT.getBytes(),
-				equalTo(Files.readAllBytes(this.pathMasterFile)));
+		assertThat(CHANGE_LOG_MASTER_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathMasterFile)));
 		assertThat(this.pathVersionMasterFile.toFile().exists(), equalTo(true));
-		assertThat(VERSION_MASTER_CONTENT.getBytes(),
-				equalTo(Files.readAllBytes(this.pathVersionMasterFile)));
+		assertThat(VERSION_MASTER_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathVersionMasterFile)));
 		assertThat(this.pathTicket1File.toFile().exists(), equalTo(true));
-		assertThat(TICKET_1_CONTENT.getBytes(),
-				equalTo(Files.readAllBytes(this.pathTicket1File)));
+		assertThat(TICKET_1_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathTicket1File)));
 	}
 
 	@Test
-	public void readModel_ModelWithOnlyOneTable_ReadsTheModelFromTheFiles()
-			throws Exception {
+	public void readModel_ModelWithOnlyOneTable_ReadsTheModelFromTheFiles() throws Exception {
 		// Vorbereitung
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER,
-				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR,
-				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC,
-				10, 2));
-		DBTable table = new DBTableModel(TABLE_NAME_1, columns,
-				new ArrayList<>());
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		DBTable table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
-		DBDataScheme expected = new DBDataSchemeModel(tables,
-				new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
 
 		// Ausführung
 		DBDataScheme returned = this.unitUnderTest.readModel();

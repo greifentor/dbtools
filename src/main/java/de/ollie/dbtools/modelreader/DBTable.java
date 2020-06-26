@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface DBTable {
 
+	void addColumns(DBColumn... dbColumns);
+
 	/**
 	 * Returns a list with the columns of the table.
 	 *
