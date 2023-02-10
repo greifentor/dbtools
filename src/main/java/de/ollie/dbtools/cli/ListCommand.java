@@ -4,9 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -26,13 +24,9 @@ import de.ollie.dbtools.utils.StatementBuilder;
  * @author ollie (16.06.2020)
  */
 @Parameters(commandDescription = "Copies contents of databases from one database to another.")
-public class CopyCommand implements Command {
+public class ListCommand implements Command {
 
-	static Logger log = LogManager.getLogger(CopyCommand.class);
-
-	@Parameter(names = {
-			"--schemeName" }, required = false, description = "The name of the scheme whose tables are to read.")
-	private String schemeName;
+	static Logger log = LogManager.getLogger(ListCommand.class);
 
 	@Parameter(names = {
 			"--sourceDriver" }, required = true, description = "The qualified class name of the JDBC driver for the "
@@ -51,53 +45,24 @@ public class CopyCommand implements Command {
 					+ "access.")
 	private String sourceUserPassword = "";
 
-	@Parameter(names = {
-			"--targetDriver" }, required = true, description = "The qualified class name of the JDBC driver for the "
-					+ "target database.")
-	private String targetDriverClassName;
-
-	@Parameter(names = { "--targetURL" }, required = true, description = "The URL of the target database.")
-	private String targetURL;
-
-	@Parameter(names = { "--targetUser" }, required = true, description = "The name of the user for target database "
-			+ "access.")
-	private String targetUserName;
-
-	@Parameter(names = {
-			"--targetPassword" }, required = false, description = "The password of the user for target database "
-					+ "access.")
-	private String targetUserPassword = "";
-
 	@Parameter(names = { "--tableNamePattern" }, required = false, description = "A pattern for table names whose data "
 			+ "are to copy (set '*' for variable start or end of the table names). More than one pattern could be "
 			+ "defined comma separated. In this case at least one pattern matching is copying the table data (default "
 			+ "is '*'; this will match all table names).")
 	private String tableNamePattern = "*";
 
-	@Parameter(names = { "--tableNameMappings" }, required = false, description = "Mappings for table names which are "
-			+ "differing in source and target data scheme. Type a comma separated list of "
-			+ "'sourceTableName=targetTableName' with this parameter.")
-	private String tableNameMappings;
-
 	@Override
-
 	public String getCommand() {
-		return "copy";
+		return "list";
 	}
 
 	@Override
 	public int run(MainParameters mainCommand) {
 		try {
 			List<String> includeTableNamePatterns = getIncludes(tableNamePattern);
-			Map<String, String> mapTableNameMappings = getTableNameMappings(tableNameMappings);
 			Connection sourceConnection = getConnection(sourceDriverClassName, sourceURL, sourceUserName,
 					sourceUserPassword);
-			Connection targetConnection = getConnection(targetDriverClassName, targetURL, targetUserName,
-					targetUserPassword);
-			new DataCopier(new StatementBuilder()).copy(sourceConnection, targetConnection, true,
-					includeTableNamePatterns,
-					mapTableNameMappings,
-					schemeName);
+			new DataCopier(new StatementBuilder()).list(sourceConnection, includeTableNamePatterns);
 		} catch (Exception e) {
 			log.error("error while copying data: " + e.getMessage(), e);
 		}
@@ -109,20 +74,6 @@ public class CopyCommand implements Command {
 			return Arrays.asList("*");
 		}
 		return Arrays.asList(StringUtils.split(includeTableNamePatterns, ','));
-	}
-
-	private Map<String, String> getTableNameMappings(String s) {
-		Map<String, String> m = new HashMap<>();
-		if (s != null) {
-			for (String mapping : StringUtils.split(s, ',')) {
-				if (!mapping.contains("=")) {
-					throw new IllegalStateException("'" + mapping + "' is not a valid table name mapping.");
-				}
-				String[] tableName = StringUtils.split(s, '=');
-				m.put(tableName[0], tableName[1]);
-			}
-		}
-		return m;
 	}
 
 	private Connection getConnection(String driverClassName, String url, String userName, String userPassword)

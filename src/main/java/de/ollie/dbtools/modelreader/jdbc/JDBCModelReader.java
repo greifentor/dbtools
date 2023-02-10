@@ -76,13 +76,17 @@ public class JDBCModelReader implements ModelReader {
 
 	private List<DBTable> readTables(DatabaseMetaData dbmd) throws SQLException {
 		List<DBTable> tables = new ArrayList<>();
-		ResultSet rs = dbmd.getTables(null, this.schemeName, "%", new String[] { "TABLE" });
+		ResultSet rs = dbmd.getTables(null, null, "%", new String[] { "TABLE" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
+			String schemeName = rs.getString("TABLE_SCHEM");
+			if ((schemeName != null) && !schemeName.equals(this.schemeName)) {
+				continue;
+			}
 			if (isMatchingImportOnlyPattern(tableName)) {
 				tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
 				System.out.println(
-						LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
+						LocalDateTime.now() + " - table added: " + schemeName + "." + tableName);
 			}
 		}
 		rs.close();

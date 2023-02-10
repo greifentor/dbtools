@@ -69,6 +69,7 @@ public class CLI {
 
 	protected void addCommands(Builder builder) {
 		addCommands(builder, createCommand(new CopyCommand()));
+		addCommands(builder, createCommand(new ListCommand()));
 	}
 
 	protected void addCommands(Builder builder, Command... commands) {

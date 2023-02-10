@@ -58,9 +58,10 @@ public class DataCopier {
 	 * @throws Exception If an error occurs while copying the data.
 	 */
 	public void copy(Connection sourceConnection, Connection targetConnection, boolean deleteBeforeCopy,
-			List<String> includeTableNamePatterns, Map<String, String> tableNameMappings) throws Exception {
+			List<String> includeTableNamePatterns, Map<String, String> tableNameMappings, String schemeName)
+			throws Exception {
 		DBDataScheme model = new JDBCModelReader(new DefaultDBObjectFactory(), new DBTypeConverter(), sourceConnection,
-				null, includeTableNamePatterns).readModel();
+				schemeName, includeTableNamePatterns).readModel();
 		for (DBTable table : model.getTables()) {
 			if (deleteBeforeCopy) {
 				deleteTableData(table, targetConnection, tableNameMappings);
@@ -89,6 +90,7 @@ public class DataCopier {
 		String insert = this.statementBuilder.createInsertStatementString(table, tableName);
 		Statement sourceStatement = sourceConnection.createStatement();
 		PreparedStatement targetStatement = targetConnection.prepareStatement(insert);
+		log.info("selecting by: " + select);
 		ResultSet rs = sourceStatement.executeQuery(select);
 		long count = count(table.getName(), sourceConnection);
 		long current = 0;
@@ -116,6 +118,15 @@ public class DataCopier {
 		rs.close();
 		statement.close();
 		return count;
+	}
+
+	public void list(Connection sourceConnection, List<String> includeTableNamePatterns) throws Exception {
+		DBDataScheme model = new JDBCModelReader(
+				new DefaultDBObjectFactory(), new DBTypeConverter(), sourceConnection, null, includeTableNamePatterns)
+						.readModel();
+		for (DBTable table : model.getTables()) {
+			log.info("found: " + table.getName());
+		}
 	}
 
 }
