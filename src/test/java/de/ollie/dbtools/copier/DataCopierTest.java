@@ -88,7 +88,7 @@ public class DataCopierTest {
 		insertData(this.connectionSource, 1, "eins", 1.11111F);
 		insertData(this.connectionSource, 2, "zwei", 2.2F);
 		// Run
-		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"), null);
+		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"), null, "PUBLIC");
 		// Check
 		assertThat(count(this.connectionTarget, TABLE_NAME_1), equalTo(2));
 	}
@@ -131,7 +131,7 @@ public class DataCopierTest {
 		tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
 		// Run
 		this.unitUnderTest.copy(this.connectionSource, this.connectionTarget, true, Arrays.asList("*"),
-				tableNameMapping);
+				tableNameMapping, "PUBLIC");
 		// Check
 		assertThat(count(this.connectionTarget, pappnase), equalTo(2));
 	}
