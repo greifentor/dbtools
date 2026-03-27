@@ -1,31 +1,27 @@
 package de.ollie.dbtools.utils;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBType;
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for class "StatementBuilder".
- * 
+ *
  * @author Oliver.Lieshoff
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class StatementBuilderTest {
+@ExtendWith(MockitoExtension.class)
+class StatementBuilderTest {
 
 	private static final String COLUMN_NAME_1 = "Id";
 	private static final String COLUMN_NAME_2 = "Name";
@@ -33,87 +29,79 @@ public class StatementBuilderTest {
 
 	private static final String TABLE_NAME_1 = "TestTable";
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@InjectMocks
 	private StatementBuilder unitUnderTest;
 
-	@Test(expected = NullPointerException.class)
-	public void createSelectStatmentString_PassANullValue_ThrowsAnException() {
-		this.unitUnderTest.createSelectStatementString(null);
+	@Test
+	void createSelectStatmentString_PassANullValue_ThrowsAnException() {
+		assertThrows(NullPointerException.class, () -> unitUnderTest.createSelectStatementString(null));
 	}
 
 	@Test
-	public void createSelectStatmentString_PassATable_ReturnsASelectStatementWithAllFieldsOfTheTable() {
+	void createSelectStatmentString_PassATable_ReturnsASelectStatementWithAllFieldsOfTheTable() {
 		// Prepare
-		String expected = "SELECT " + COLUMN_NAME_1 + ", " + COLUMN_NAME_2
-				+ ", " + COLUMN_NAME_3 + " FROM " + TABLE_NAME_1;
+		String expected = "SELECT " + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3 + " FROM " + TABLE_NAME_1;
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER,
-				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR,
-				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC,
-				10, 2));
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns,
-				new ArrayList<>());
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
-		String returned = this.unitUnderTest.createSelectStatementString(table);
+		String returned = unitUnderTest.createSelectStatementString(table);
 		// Check
-		assertThat(returned, equalTo(expected));
+		assertEquals(expected, returned);
 	}
 
 	@Test
-	public void createSelectStatmentString_PassATableWithOutColumns_ThrowsAnException() {
+	void createSelectStatmentString_PassATableWithOutColumns_ThrowsAnException() {
 		// Prepare
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(),
-				new ArrayList<>());
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(), new ArrayList<>());
 		// Check
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage(
-				equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
-
-		this.unitUnderTest.createSelectStatementString(table);
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void createInsertStatmentString_PassANullValue_ThrowsAnException() {
-		this.unitUnderTest.createInsertStatementString(null);
+		IllegalArgumentException thrown = assertThrows(
+			IllegalArgumentException.class,
+			() -> unitUnderTest.createSelectStatementString(table)
+		);
+		assertEquals("Table '" + TABLE_NAME_1 + "' has no columns.", thrown.getMessage());
 	}
 
 	@Test
-	public void createInsertStatmentString_PassATable_ReturnsAInsertStatementWithAllFieldsOfTheTable() {
+	void createInsertStatmentString_PassANullValue_ThrowsAnException() {
+		assertThrows(NullPointerException.class, () -> unitUnderTest.createInsertStatementString(null));
+	}
+
+	@Test
+	void createInsertStatmentString_PassATable_ReturnsAInsertStatementWithAllFieldsOfTheTable() {
 		// Prepare
-		String expected = "INSERT INTO " + TABLE_NAME_1 + " (" + COLUMN_NAME_1
-				+ ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3
-				+ ") VALUES (?, ?, ?)";
+		String expected =
+			"INSERT INTO " +
+			TABLE_NAME_1 +
+			" (" +
+			COLUMN_NAME_1 +
+			", " +
+			COLUMN_NAME_2 +
+			", " +
+			COLUMN_NAME_3 +
+			") VALUES (?, ?, ?)";
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER,
-				-1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR,
-				100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC,
-				10, 2));
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns,
-				new ArrayList<>());
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
-		String returned = this.unitUnderTest.createInsertStatementString(table);
+		String returned = unitUnderTest.createInsertStatementString(table);
 		// Check
-		assertThat(returned, equalTo(expected));
+		assertEquals(expected, returned);
 	}
 
 	@Test
-	public void createInsertStatmentString_PassATableWithOutColumns_ThrowsAnException() {
+	void createInsertStatmentString_PassATableWithOutColumns_ThrowsAnException() {
 		// Prepare
-		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(),
-				new ArrayList<>());
+		DBTableModel table = new DBTableModel(TABLE_NAME_1, new ArrayList<>(), new ArrayList<>());
 		// Check
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage(
-				equalTo("Table '" + TABLE_NAME_1 + "' has no columns."));
-
-		this.unitUnderTest.createInsertStatementString(table);
+		IllegalArgumentException thrown = assertThrows(
+			IllegalArgumentException.class,
+			() -> unitUnderTest.createInsertStatementString(table)
+		);
+		assertEquals("Table '" + TABLE_NAME_1 + "' has no columns.", thrown.getMessage());
 	}
-
 }

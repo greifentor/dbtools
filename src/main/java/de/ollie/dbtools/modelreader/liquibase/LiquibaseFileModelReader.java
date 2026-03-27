@@ -1,10 +1,5 @@
 package de.ollie.dbtools.modelreader.liquibase;
 
-import java.io.File;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBObjectFactory;
@@ -12,6 +7,10 @@ import de.ollie.dbtools.modelreader.DBTable;
 import de.ollie.dbtools.modelreader.DBType;
 import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.ModelReader;
+import java.io.File;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -48,8 +47,12 @@ public class LiquibaseFileModelReader implements ModelReader {
 	 * @param rootFile      The root file of the Liquibase model.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public LiquibaseFileModelReader(DBObjectFactory factory, DBTypeConverter typesConverter, File baseDirectory,
-			File rootFile) {
+	public LiquibaseFileModelReader(
+		DBObjectFactory factory,
+		DBTypeConverter typesConverter,
+		File baseDirectory,
+		File rootFile
+	) {
 		super();
 		this.baseDirectory = baseDirectory;
 		this.factory = factory;
@@ -66,8 +69,10 @@ public class LiquibaseFileModelReader implements ModelReader {
 	private DatabaseChangeLog getDatabaseChangeLog() throws Exception {
 		ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(this.baseDirectory.getAbsolutePath());
 		ChangeLogParameters changeLogParameters = new ChangeLogParameters();
-		return ChangeLogParserFactory.getInstance().getParser(this.rootFile.getName(), resourceAccessor)
-				.parse(this.rootFile.getName(), changeLogParameters, resourceAccessor);
+		return ChangeLogParserFactory
+			.getInstance()
+			.getParser(this.rootFile.getName(), resourceAccessor)
+			.parse(this.rootFile.getName(), changeLogParameters, resourceAccessor);
 	}
 
 	private DBDataScheme createDataScheme(DatabaseChangeLog changeLog) {
@@ -78,10 +83,12 @@ public class LiquibaseFileModelReader implements ModelReader {
 				if (change instanceof AddColumnChange) {
 					AddColumnChange acc = (AddColumnChange) change;
 					List<DBColumn> columns = createColumns(acc.getColumns());
-					scheme.getTableByName(acc.getTableName()) //
-							.orElseThrow(() -> new IllegalStateException(
-									"table '" + acc.getTableName() + "' not found for adding columns:" + columns))
-							.addColumns(columns.toArray(new DBColumn[0]));
+					scheme
+						.getTableByName(acc.getTableName()) //
+						.orElseThrow(() ->
+							new IllegalStateException("table '" + acc.getTableName() + "' not found for adding columns:" + columns)
+						)
+						.addColumns(columns.toArray(new DBColumn[0]));
 					// tables.add(this.factory.createTable(ctc.getTableName(), columns, new ArrayList<>()));
 				} else if (change instanceof CreateTableChange) {
 					CreateTableChange ctc = (CreateTableChange) change;
@@ -99,8 +106,15 @@ public class LiquibaseFileModelReader implements ModelReader {
 		List<DBColumn> columns = new ArrayList<>();
 		for (ColumnConfig cc : columnConfigs) {
 			TypeInfo type = getDataType(cc);
-			columns.add(this.factory.createColumn(cc.getName(), type.getName(), getDBType(type.getDataType()),
-					type.getColumnSize(), type.getDecimalDigits()));
+			columns.add(
+				this.factory.createColumn(
+						cc.getName(),
+						type.getName(),
+						getDBType(type.getDataType()),
+						type.getColumnSize(),
+						type.getDecimalDigits()
+					)
+			);
 		}
 		return columns;
 	}
@@ -113,8 +127,15 @@ public class LiquibaseFileModelReader implements ModelReader {
 		List<DBColumn> columns = new ArrayList<>();
 		for (ColumnConfig cc : columnConfigs) {
 			TypeInfo type = getDataType(cc);
-			columns.add(this.factory.createColumn(cc.getName(), type.getName(), getDBType(type.getDataType()),
-					type.getColumnSize(), type.getDecimalDigits()));
+			columns.add(
+				this.factory.createColumn(
+						cc.getName(),
+						type.getName(),
+						getDBType(type.getDataType()),
+						type.getColumnSize(),
+						type.getDecimalDigits()
+					)
+			);
 		}
 		return columns;
 	}
@@ -168,5 +189,4 @@ public class LiquibaseFileModelReader implements ModelReader {
 		}
 		return ti;
 	}
-
 }

@@ -7,11 +7,10 @@ package de.ollie.dbtools.modelreader;
  *
  */
 public interface DBColumn {
-
 	/**
 	 * Returns the size of the column or "0" if no size is defined for the
 	 * column.
-	 * 
+	 *
 	 * @return The size of the column or "0" if no size is defined for the
 	 *         column.
 	 */
@@ -19,7 +18,7 @@ public interface DBColumn {
 
 	/**
 	 * Returns the number of the decimal digits if column is a NUMERIC.
-	 * 
+	 *
 	 * @return The number of the decimal digits if column is a NUMERIC.
 	 */
 	int getDecimalDigits();
@@ -44,5 +43,4 @@ public interface DBColumn {
 	 * @return A human readable name of the fields type.
 	 */
 	String getTypeName();
-
 }

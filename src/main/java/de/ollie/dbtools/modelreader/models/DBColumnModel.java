@@ -22,10 +22,11 @@ public class DBColumnModel implements DBColumn {
 
 	@NonNull
 	private String name;
+
 	@NonNull
 	private String typeName;
+
 	private DBType type;
 	private int columnSize;
 	private int decimalDigits;
-
 }

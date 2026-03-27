@@ -17,5 +17,4 @@ class TypeInfo {
 	private int columnSize = -1;
 	private int dataType;
 	private int decimalDigits = -1;
-
 }

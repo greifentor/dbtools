@@ -7,7 +7,6 @@ package de.ollie.dbtools.modelreader;
  *
  */
 public interface ModelReader {
-
 	/**
 	 * Read the data model which is representing the database linked to the
 	 * passed connection.
@@ -18,5 +17,4 @@ public interface ModelReader {
 	 *             If an error occurs while accessing the database.
 	 */
 	DBDataScheme readModel() throws Exception;
-
 }

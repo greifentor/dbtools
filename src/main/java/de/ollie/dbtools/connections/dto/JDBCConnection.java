@@ -21,5 +21,4 @@ public class JDBCConnection {
 	private String password;
 	private String username;
 	private String url;
-
 }

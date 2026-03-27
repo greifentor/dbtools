@@ -3,18 +3,9 @@
  *
  * 20.09.2018
  *
- * (c) by O.Lieshoff 
+ * (c) by O.Lieshoff
  */
 package de.ollie.dbtools.modelreader.jdbc;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
@@ -24,6 +15,14 @@ import de.ollie.dbtools.modelreader.DBSequence;
 import de.ollie.dbtools.modelreader.DBTable;
 import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.ModelReader;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class which is able to read the meta data of a database.
@@ -49,8 +48,13 @@ public class JDBCModelReader implements ModelReader {
 	 * @param includeTableNamePatterns A list with the table name patterns. Only one have to match to import a table.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public JDBCModelReader(DBObjectFactory factory, DBTypeConverter typeConverter, Connection connection,
-			String schemeName, List<String> includeTableNamePatterns) {
+	public JDBCModelReader(
+		DBObjectFactory factory,
+		DBTypeConverter typeConverter,
+		Connection connection,
+		String schemeName,
+		List<String> includeTableNamePatterns
+	) {
 		super();
 		this.connection = connection;
 		this.factory = factory;
@@ -81,8 +85,7 @@ public class JDBCModelReader implements ModelReader {
 			String tableName = rs.getString("TABLE_NAME");
 			if (isMatchingImportOnlyPattern(tableName)) {
 				tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
-				System.out.println(
-						LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
+				System.out.println(LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
 			}
 		}
 		rs.close();
@@ -91,11 +94,17 @@ public class JDBCModelReader implements ModelReader {
 
 	private boolean isMatchingImportOnlyPattern(String tableName) {
 		for (String pattern : this.includeTableNamePatterns) {
-			if (pattern.equals("*") || pattern.equals(tableName)
-					|| (pattern.startsWith("*") && pattern.endsWith("*")
-							&& tableName.contains(pattern.substring(1, pattern.length() - 1))) //
-					|| (pattern.startsWith("*") && tableName.endsWith(pattern.substring(1))) //
-					|| (pattern.endsWith("*") && tableName.startsWith(pattern.substring(0, pattern.length() - 1)))) {
+			if (
+				pattern.equals("*") ||
+				pattern.equals(tableName) ||
+				(
+					pattern.startsWith("*") &&
+					pattern.endsWith("*") &&
+					tableName.contains(pattern.substring(1, pattern.length() - 1))
+				) || //
+				(pattern.startsWith("*") && tableName.endsWith(pattern.substring(1))) || //
+				(pattern.endsWith("*") && tableName.startsWith(pattern.substring(0, pattern.length() - 1)))
+			) {
 				return true;
 			}
 		}
@@ -112,21 +121,47 @@ public class JDBCModelReader implements ModelReader {
 				int dataType = rs.getInt("DATA_TYPE");
 				int columnSize = -1;
 				int decimalDigits = -1;
-				if ((dataType == Types.CHAR) || (dataType == Types.DECIMAL) || (dataType == Types.FLOAT)
-						|| (dataType == Types.LONGVARCHAR) || (dataType == Types.NUMERIC)
-						|| (dataType == Types.VARBINARY) || (dataType == Types.VARCHAR)) {
+				if (
+					(dataType == Types.CHAR) ||
+					(dataType == Types.DECIMAL) ||
+					(dataType == Types.FLOAT) ||
+					(dataType == Types.LONGVARCHAR) ||
+					(dataType == Types.NUMERIC) ||
+					(dataType == Types.VARBINARY) ||
+					(dataType == Types.VARCHAR)
+				) {
 					columnSize = rs.getInt("COLUMN_SIZE");
 				}
 				if ((dataType == Types.DECIMAL) || (dataType == Types.NUMERIC)) {
 					decimalDigits = rs.getInt("DECIMAL_DIGITS");
 				}
 				try {
-					table.getColumns().add(this.factory.createColumn(columnName, typeName,
-							this.typeConverter.convert(dataType), columnSize, decimalDigits));
+					table
+						.getColumns()
+						.add(
+							this.factory.createColumn(
+									columnName,
+									typeName,
+									this.typeConverter.convert(dataType),
+									columnSize,
+									decimalDigits
+								)
+						);
 				} catch (Exception e) {
 					System.out.println(
-							"Problems while reading column '" + rs.getString("TABLE_SCHEM") + "." + table.getName()
-									+ "." + columnName + "' (" + typeName + " {" + dataType + "}): " + e.getMessage());
+						"Problems while reading column '" +
+						rs.getString("TABLE_SCHEM") +
+						"." +
+						table.getName() +
+						"." +
+						columnName +
+						"' (" +
+						typeName +
+						" {" +
+						dataType +
+						"}): " +
+						e.getMessage()
+					);
 				}
 			}
 			rs.close();
@@ -148,8 +183,7 @@ public class JDBCModelReader implements ModelReader {
 						DBColumn column = getColumnByName(columnName, table);
 						index.getColumns().add(column);
 					} catch (IllegalArgumentException iae) {
-						System.out.println(
-								LocalDateTime.now() + " - Index '" + indexName + "'not added: " + iae.getMessage());
+						System.out.println(LocalDateTime.now() + " - Index '" + indexName + "'not added: " + iae.getMessage());
 					}
 				}
 			}
@@ -181,5 +215,4 @@ public class JDBCModelReader implements ModelReader {
 		List<DBSequence> sequences = new ArrayList<>();
 		return sequences;
 	}
-
 }

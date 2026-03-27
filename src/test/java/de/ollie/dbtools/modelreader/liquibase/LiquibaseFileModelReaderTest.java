@@ -1,22 +1,8 @@
 package de.ollie.dbtools.modelreader.liquibase;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
@@ -27,6 +13,17 @@ import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
 import de.ollie.dbtools.modelreader.models.DBColumnModel;
 import de.ollie.dbtools.modelreader.models.DBDataSchemeModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests of class "LiquibaseFileModelReader".
@@ -34,8 +31,8 @@ import de.ollie.dbtools.modelreader.models.DBTableModel;
  * @author Oliver.Lieshoff
  *
  */
-@RunWith(MockitoJUnitRunner.class)
-public class LiquibaseFileModelReaderTest {
+@ExtendWith(MockitoExtension.class)
+class LiquibaseFileModelReaderTest {
 
 	private static final String COLUMN_NAME_1 = "Id";
 	private static final String COLUMN_NAME_2 = "Name";
@@ -56,8 +53,8 @@ public class LiquibaseFileModelReaderTest {
 
 	private LiquibaseFileModelReader unitUnderTest = null;
 
-	@Rule
-	public TemporaryFolder temp = new TemporaryFolder();
+	@TempDir
+	public File temp;
 
 	private DefaultDBObjectFactory factory = new DefaultDBObjectFactory();
 	private Path pathMasterFile = null;
@@ -65,68 +62,79 @@ public class LiquibaseFileModelReaderTest {
 	private Path pathVersionMasterFile = null;
 	private DBTypeConverter typesConverter = new DBTypeConverter();
 
-	private static final String CHANGE_LOG_MASTER_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<databaseChangeLog\n" //
-			+ "        xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n"
-			+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "        xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n"
-			+ "                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\">\n"
-			+ "    <include file=\"1.0.0/version-master.xml\" relativeToChangelogFile=\"true\"/>\n"
-			+ "</databaseChangeLog>";
+	private static final String CHANGE_LOG_MASTER_CONTENT =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<databaseChangeLog\n" + //
+		"        xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
+		"        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+		"        xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
+		"                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\">\n" +
+		"    <include file=\"1.0.0/version-master.xml\" relativeToChangelogFile=\"true\"/>\n" +
+		"</databaseChangeLog>";
 
-	private static final String VERSION_MASTER_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-			+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\r\n"
-			+ "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
-			+ "                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\r\n"
-			+ "                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\">\r\n"
-			+ "    <include file=\"Ticket-1/Ticket-1.xml\" relativeToChangelogFile=\"true\"/>\r\n"
-			+ "</databaseChangeLog>";
+	private static final String VERSION_MASTER_CONTENT =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
+		"<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\r\n" +
+		"                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n" +
+		"                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\r\n" +
+		"                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\">\r\n" +
+		"    <include file=\"Ticket-1/Ticket-1.xml\" relativeToChangelogFile=\"true\"/>\r\n" +
+		"</databaseChangeLog>";
 
-	private static final String TICKET_1_CONTENT = "<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n"
-			+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\r\n"
-			+ "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
-			+ "                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd\">\r\n"
-			+ "    <changeSet author=\"Oliver.Lieshoff\" id=\"Ticket-1\">\r\n" //
-			+ "        <createTable tableName=\"" + TABLE_NAME_1 + "\">\r\n" //
-			+ "            <column name=\"" + COLUMN_NAME_1 + "\" type=\"INTEGER\">\r\n" //
-			+ "                <constraints primaryKey=\"true\" primaryKeyName=\"" + TABLE_1_PRIMARY_KEY
-			+ "_pkey\"/>\r\n" //
-			+ "            </column>\r\n" //
-			+ "            <column name=\"" + COLUMN_NAME_2 + "\" type=\"VARCHAR(100)\"/>\r\n" //
-			+ "            <column name=\"" + COLUMN_NAME_3 + "\" type=\"NUMERIC(10,2)\"/>\r\n" ///
-			+ "        </createTable>\r\n" //
-			+ "    </changeSet>\r\n" //
-			+ "</databaseChangeLog>";
+	private static final String TICKET_1_CONTENT =
+		"<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" +
+		"<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\r\n" +
+		"                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n" +
+		"                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd\">\r\n" +
+		"    <changeSet author=\"Oliver.Lieshoff\" id=\"Ticket-1\">\r\n" + //
+		"        <createTable tableName=\"" +
+		TABLE_NAME_1 +
+		"\">\r\n" + //
+		"            <column name=\"" +
+		COLUMN_NAME_1 +
+		"\" type=\"INTEGER\">\r\n" + //
+		"                <constraints primaryKey=\"true\" primaryKeyName=\"" +
+		TABLE_1_PRIMARY_KEY +
+		"_pkey\"/>\r\n" + //
+		"            </column>\r\n" + //
+		"            <column name=\"" +
+		COLUMN_NAME_2 +
+		"\" type=\"VARCHAR(100)\"/>\r\n" + //
+		"            <column name=\"" +
+		COLUMN_NAME_3 +
+		"\" type=\"NUMERIC(10,2)\"/>\r\n" + ///
+		"        </createTable>\r\n" + //
+		"    </changeSet>\r\n" + //
+		"</databaseChangeLog>";
 
-	@Before
-	public void setUp() throws Exception {
-		File baseFolder = this.temp.newFolder();
+	@BeforeEach
+	void setUp() throws Exception {
+		File baseFolder = temp;
 		File versionFolder = new File(baseFolder, "1.0.0");
 		versionFolder.mkdirs();
 		File ticketFolder = new File(versionFolder, "Ticket-1");
 		ticketFolder.mkdirs();
-		this.pathMasterFile = Files.createFile(Paths.get(baseFolder.getAbsolutePath(), "master.xml"));
-		Files.write(this.pathMasterFile, CHANGE_LOG_MASTER_CONTENT.getBytes());
-		this.pathVersionMasterFile = Files.createFile(Paths.get(versionFolder.getAbsolutePath(), "version-master.xml"));
-		Files.write(this.pathVersionMasterFile, VERSION_MASTER_CONTENT.getBytes());
-		this.pathTicket1File = Files.createFile(Paths.get(ticketFolder.getAbsolutePath(), "Ticket-1.xml"));
-		Files.write(this.pathTicket1File, TICKET_1_CONTENT.getBytes());
-		this.unitUnderTest = new LiquibaseFileModelReader(this.factory, this.typesConverter, baseFolder,
-				this.pathMasterFile.toFile());
+		pathMasterFile = Files.createFile(Paths.get(baseFolder.getAbsolutePath(), "master.xml"));
+		Files.write(pathMasterFile, CHANGE_LOG_MASTER_CONTENT.getBytes());
+		pathVersionMasterFile = Files.createFile(Paths.get(versionFolder.getAbsolutePath(), "version-master.xml"));
+		Files.write(pathVersionMasterFile, VERSION_MASTER_CONTENT.getBytes());
+		pathTicket1File = Files.createFile(Paths.get(ticketFolder.getAbsolutePath(), "Ticket-1.xml"));
+		Files.write(pathTicket1File, TICKET_1_CONTENT.getBytes());
+		unitUnderTest = new LiquibaseFileModelReader(factory, typesConverter, baseFolder, pathMasterFile.toFile());
 	}
 
 	@Test
-	public void temporaryFilesAreCreatedProperly() throws Exception {
-		assertThat(this.pathMasterFile.toFile().exists(), equalTo(true));
-		assertThat(CHANGE_LOG_MASTER_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathMasterFile)));
-		assertThat(this.pathVersionMasterFile.toFile().exists(), equalTo(true));
-		assertThat(VERSION_MASTER_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathVersionMasterFile)));
-		assertThat(this.pathTicket1File.toFile().exists(), equalTo(true));
-		assertThat(TICKET_1_CONTENT.getBytes(), equalTo(Files.readAllBytes(this.pathTicket1File)));
+	void temporaryFilesAreCreatedProperly() throws Exception {
+		assertTrue(pathMasterFile.toFile().exists());
+		assertArrayEquals(CHANGE_LOG_MASTER_CONTENT.getBytes(), Files.readAllBytes(pathMasterFile));
+		assertTrue(pathVersionMasterFile.toFile().exists());
+		assertArrayEquals(VERSION_MASTER_CONTENT.getBytes(), Files.readAllBytes(pathVersionMasterFile));
+		assertTrue(pathTicket1File.toFile().exists());
+		assertArrayEquals(TICKET_1_CONTENT.getBytes(), Files.readAllBytes(pathTicket1File));
 	}
 
 	@Test
-	public void readModel_ModelWithOnlyOneTable_ReadsTheModelFromTheFiles() throws Exception {
+	void readModel_ModelWithOnlyOneTable_ReadsTheModelFromTheFiles() throws Exception {
 		// Vorbereitung
 		List<DBColumn> columns = new ArrayList<>();
 		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
@@ -138,11 +146,9 @@ public class LiquibaseFileModelReaderTest {
 		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
 
 		// Ausführung
-		DBDataScheme returned = this.unitUnderTest.readModel();
+		DBDataScheme returned = unitUnderTest.readModel();
 
 		// Prüfung
 		assertEquals(expected.toString(), returned.toString());
-
 	}
-
 }

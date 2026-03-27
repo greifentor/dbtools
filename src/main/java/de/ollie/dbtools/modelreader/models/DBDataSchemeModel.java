@@ -1,12 +1,11 @@
 package de.ollie.dbtools.modelreader.models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBSequence;
 import de.ollie.dbtools.modelreader.DBTable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -37,9 +36,8 @@ public class DBDataSchemeModel implements DBDataScheme {
 	@Override
 	public Optional<DBTable> getTableByName(String name) {
 		return tables //
-				.stream() //
-				.filter(table -> table.getName().equals(name)) //
-				.findAny();
+			.stream() //
+			.filter(table -> table.getName().equals(name)) //
+			.findAny();
 	}
-
 }

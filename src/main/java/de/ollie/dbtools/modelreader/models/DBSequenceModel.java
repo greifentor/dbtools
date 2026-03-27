@@ -21,5 +21,4 @@ public class DBSequenceModel implements DBSequence {
 	private String name;
 	private int start;
 	private int increment;
-
 }

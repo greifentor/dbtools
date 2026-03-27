@@ -1,18 +1,15 @@
 package de.ollie.dbtools.cli;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The anchor class for the dbtools CLI tooling.
@@ -29,15 +26,12 @@ public class CLI {
 
 		@Parameter(names = "--help", description = "Prints this help info to the console.")
 		private boolean help = false;
-
 	}
 
 	public static interface Command {
-
 		String getCommand();
 
 		int run(MainParameters mainCommand);
-
 	}
 
 	private Map<String, Command> commands = new HashMap<>();
@@ -49,8 +43,9 @@ public class CLI {
 
 	public int start(String... args) {
 		MainParameters mainParameters = new MainParameters();
-		Builder builder = JCommander.newBuilder() //
-				.addObject(mainParameters);
+		Builder builder = JCommander
+			.newBuilder() //
+			.addObject(mainParameters);
 		addCommands(builder);
 		JCommander jc = builder.build();
 		try {
@@ -88,5 +83,4 @@ public class CLI {
 		log.info("program finished with code: " + returnCode);
 		return returnCode;
 	}
-
 }

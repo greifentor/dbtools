@@ -1,13 +1,12 @@
 package de.ollie.dbtools.utils;
 
-import java.util.Objects;
-
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBTable;
+import java.util.Objects;
 
 /**
  * A class which is able to build several statement strings for a table model.
- * 
+ *
  * @author Oliver.Lieshoff
  *
  */
@@ -67,8 +66,10 @@ public class StatementBuilder {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			} else {
-				sb.append("INSERT INTO ").append(alternativeTableName != null ? alternativeTableName : table.getName())
-						.append(" (");
+				sb
+					.append("INSERT INTO ")
+					.append(alternativeTableName != null ? alternativeTableName : table.getName())
+					.append(" (");
 			}
 			sb.append(column.getName());
 		}
@@ -86,5 +87,4 @@ public class StatementBuilder {
 		}
 		return sb.toString();
 	}
-
 }

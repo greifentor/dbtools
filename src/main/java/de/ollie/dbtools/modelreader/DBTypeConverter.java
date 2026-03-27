@@ -12,7 +12,7 @@ public class DBTypeConverter {
 
 	/**
 	 * Converts the passed Types value to an DBType enum.
-	 * 
+	 *
 	 * @param dataType A Types value.
 	 * @return A DBType for the passed Types constant.
 	 * @throws IllegalArgumentException Passing an unknown value.
@@ -51,5 +51,4 @@ public class DBTypeConverter {
 		}
 		throw new IllegalArgumentException("there is no mapping for data type value: " + dataType);
 	}
-
 }

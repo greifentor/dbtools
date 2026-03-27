@@ -9,7 +9,6 @@ import java.util.List;
  *
  */
 public interface DBObjectFactory {
-
 	/**
 	 * Creates a database column object.
 	 *
@@ -45,5 +44,4 @@ public interface DBObjectFactory {
 	 * @param index     The indices which are assigned to the table.
 	 */
 	DBTable createTable(String tableName, List<DBColumn> columns, List<DBIndex> indices);
-
 }

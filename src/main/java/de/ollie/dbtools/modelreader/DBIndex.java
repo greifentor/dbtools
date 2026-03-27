@@ -9,10 +9,9 @@ import java.util.List;
  *
  */
 public interface DBIndex {
-
 	/**
 	 * Returns a list with the columns which are members of the index.
-	 * 
+	 *
 	 * @return A list with the columns which are members of the index.
 	 */
 	List<DBColumn> getColumns();
@@ -23,5 +22,4 @@ public interface DBIndex {
 	 * @return The name of the index.
 	 */
 	String getName();
-
 }

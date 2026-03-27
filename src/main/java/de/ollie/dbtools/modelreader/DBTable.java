@@ -9,7 +9,6 @@ import java.util.List;
  *
  */
 public interface DBTable {
-
 	void addColumns(DBColumn... dbColumns);
 
 	/**
@@ -28,9 +27,8 @@ public interface DBTable {
 
 	/**
 	 * Returns the name of the table.
-	 * 
+	 *
 	 * @return The name of the table.
 	 */
 	String getName();
-
 }
