@@ -40,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @author O.Lieshoff
  */
 @ExtendWith(MockitoExtension.class)
-public class JDBCModelReaderTest {
+class JDBCModelReaderTest {
 
 	private static final String COLUMN_NAME_1 = "Id";
 	private static final String COLUMN_NAME_2 = "Name";
@@ -60,7 +60,7 @@ public class JDBCModelReaderTest {
 	private JDBCModelReader unitUnderTest = null;
 
 	@TempDir
-	public File temp;
+	private File temp;
 
 	private Connection connectionSource = null;
 	private DefaultDBObjectFactory factory = new DefaultDBObjectFactory();
@@ -102,7 +102,7 @@ public class JDBCModelReaderTest {
 	@Test
 	void readModel_ValidConnectionOfAnEmptyDatabasePassed_ReturnsAnEmptyModel() throws Exception {
 		// Prepare
-		DBDataScheme expected = new DBDataSchemeModel(new ArrayList<>(), new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		// Run
 		DBDataScheme returned = unitUnderTest.readModel();
 		// Check
@@ -150,7 +150,7 @@ public class JDBCModelReaderTest {
 		DBTable table = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
-		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>(), new ArrayList<>());
 		// Run
 		DBDataScheme returned = unitUnderTest.readModel();
 		// Check
@@ -175,7 +175,7 @@ public class JDBCModelReaderTest {
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table2);
 		tables.add(table1);
-		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>(), new ArrayList<>());
 		// Run
 		DBDataScheme returned = unitUnderTest.readModel();
 		// Check
@@ -223,7 +223,7 @@ public class JDBCModelReaderTest {
 		DBTableModel table = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
-		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>(), new ArrayList<>());
 		// Run
 		DBDataScheme returned = unitUnderTest.readModel();
 		// Check

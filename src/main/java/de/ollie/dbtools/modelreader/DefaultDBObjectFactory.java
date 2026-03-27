@@ -6,12 +6,6 @@ import de.ollie.dbtools.modelreader.models.DBIndexModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 import java.util.List;
 
-/**
- * A default implementation of the DB object factory.
- *
- * @author ollie
- *
- */
 public class DefaultDBObjectFactory implements DBObjectFactory {
 
 	@Override
@@ -20,8 +14,12 @@ public class DefaultDBObjectFactory implements DBObjectFactory {
 	}
 
 	@Override
-	public DBDataScheme createDataScheme(List<DBTable> tables, List<DBSequence> sequences) {
-		return new DBDataSchemeModel(tables, sequences);
+	public DBDataScheme createDataScheme(
+		List<DBTable> tables,
+		List<DBSequence> sequences,
+		List<DBForeignKey> foreignKeys
+	) {
+		return new DBDataSchemeModel(tables, sequences, foreignKeys);
 	}
 
 	@Override

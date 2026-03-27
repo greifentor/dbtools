@@ -26,7 +26,8 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * A Liquibase model reader, which is able to process Liquibase XML file from the file system.
+ * A Liquibase model reader, which is able to process Liquibase XML file from
+ * the file system.
  *
  * @author Oliver.Lieshoff
  *
@@ -41,9 +42,11 @@ public class LiquibaseFileModelReader implements ModelReader {
 	/**
 	 * Creates a new model reader with the passed parameters.
 	 *
-	 * @param factory       An object factory implementation to create the DB objects.
+	 * @param factory       An object factory implementation to create the DB
+	 *                      objects.
 	 * @param typeConverter A converter for the types.
-	 * @param baseDirectory The directory which contains the base XML file of the model.
+	 * @param baseDirectory The directory which contains the base XML file of the
+	 *                      model.
 	 * @param rootFile      The root file of the Liquibase model.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
@@ -77,7 +80,7 @@ public class LiquibaseFileModelReader implements ModelReader {
 
 	private DBDataScheme createDataScheme(DatabaseChangeLog changeLog) {
 		List<DBTable> tables = new ArrayList<>();
-		DBDataScheme scheme = this.factory.createDataScheme(tables, new ArrayList<>());
+		DBDataScheme scheme = this.factory.createDataScheme(tables, new ArrayList<>(), new ArrayList<>());
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
 			for (Change change : changeSet.getChanges()) {
 				if (change instanceof AddColumnChange) {
@@ -89,7 +92,8 @@ public class LiquibaseFileModelReader implements ModelReader {
 							new IllegalStateException("table '" + acc.getTableName() + "' not found for adding columns:" + columns)
 						)
 						.addColumns(columns.toArray(new DBColumn[0]));
-					// tables.add(this.factory.createTable(ctc.getTableName(), columns, new ArrayList<>()));
+					// tables.add(this.factory.createTable(ctc.getTableName(), columns, new
+					// ArrayList<>()));
 				} else if (change instanceof CreateTableChange) {
 					CreateTableChange ctc = (CreateTableChange) change;
 					List<DBColumn> columns = createColumns(ctc.getColumns());

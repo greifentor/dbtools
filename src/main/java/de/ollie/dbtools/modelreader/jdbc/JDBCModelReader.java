@@ -24,11 +24,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A class which is able to read the meta data of a database.
- *
- * @author O.Lieshoff
- */
 public class JDBCModelReader implements ModelReader {
 
 	private Connection connection;
@@ -40,12 +35,16 @@ public class JDBCModelReader implements ModelReader {
 	/**
 	 * Creates a new model reader with the passed parameters.
 	 *
-	 * @param factory                  An object factory implementation to create the DB objects.
+	 * @param factory                  An object factory implementation to create
+	 *                                 the DB objects.
 	 * @param typeConverter            A converter for database types.
-	 * @param connection               The connection whose data model should be read.
-	 * @param schemeName               The name of the scheme whose data are to read (pass "null" to ignore scheme and
-	 *                                 load all tables).
-	 * @param includeTableNamePatterns A list with the table name patterns. Only one have to match to import a table.
+	 * @param connection               The connection whose data model should be
+	 *                                 read.
+	 * @param schemeName               The name of the scheme whose data are to read
+	 *                                 (pass "null" to ignore scheme and load all
+	 *                                 tables).
+	 * @param includeTableNamePatterns A list with the table name patterns. Only one
+	 *                                 have to match to import a table.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
 	public JDBCModelReader(
@@ -65,10 +64,10 @@ public class JDBCModelReader implements ModelReader {
 
 	@Override
 	public DBDataScheme readModel() throws Exception {
-		DatabaseMetaData dbmd = this.connection.getMetaData();
+		DatabaseMetaData dbmd = connection.getMetaData();
 		List<DBTable> tables = getTables(dbmd);
 		List<DBSequence> sequences = getSequences(dbmd);
-		return this.factory.createDataScheme(tables, sequences);
+		return factory.createDataScheme(tables, sequences, new ArrayList<>());
 	}
 
 	private List<DBTable> getTables(DatabaseMetaData dbmd) throws SQLException {
@@ -80,11 +79,11 @@ public class JDBCModelReader implements ModelReader {
 
 	private List<DBTable> readTables(DatabaseMetaData dbmd) throws SQLException {
 		List<DBTable> tables = new ArrayList<>();
-		ResultSet rs = dbmd.getTables(null, this.schemeName, "%", new String[] { "TABLE" });
+		ResultSet rs = dbmd.getTables(null, schemeName, "%", new String[] { "TABLE" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
 			if (isMatchingImportOnlyPattern(tableName)) {
-				tables.add(this.factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
+				tables.add(factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
 				System.out.println(LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
 			}
 		}
@@ -93,7 +92,7 @@ public class JDBCModelReader implements ModelReader {
 	}
 
 	private boolean isMatchingImportOnlyPattern(String tableName) {
-		for (String pattern : this.includeTableNamePatterns) {
+		for (String pattern : includeTableNamePatterns) {
 			if (
 				pattern.equals("*") ||
 				pattern.equals(tableName) ||
@@ -114,7 +113,7 @@ public class JDBCModelReader implements ModelReader {
 	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {
 		for (DBTable table : tables) {
 			System.out.println(LocalDateTime.now() + " - reading columns for table: " + table.getName());
-			ResultSet rs = dbmd.getColumns(null, this.schemeName, table.getName(), "%");
+			ResultSet rs = dbmd.getColumns(null, schemeName, table.getName(), "%");
 			while (rs.next()) {
 				String columnName = rs.getString("COLUMN_NAME");
 				String typeName = rs.getString("TYPE_NAME");
@@ -139,13 +138,7 @@ public class JDBCModelReader implements ModelReader {
 					table
 						.getColumns()
 						.add(
-							this.factory.createColumn(
-									columnName,
-									typeName,
-									this.typeConverter.convert(dataType),
-									columnSize,
-									decimalDigits
-								)
+							factory.createColumn(columnName, typeName, typeConverter.convert(dataType), columnSize, decimalDigits)
 						);
 				} catch (Exception e) {
 					System.out.println(
@@ -172,7 +165,7 @@ public class JDBCModelReader implements ModelReader {
 		for (DBTable table : tables) {
 			System.out.println(LocalDateTime.now() + " - reading indices for table: " + table.getName());
 			// TODO: Set "false, false" to "true, true" for large oracle tables.
-			ResultSet rs = dbmd.getIndexInfo(null, this.schemeName, table.getName(), false, false);
+			ResultSet rs = dbmd.getIndexInfo(null, schemeName, table.getName(), false, false);
 			while (rs.next()) {
 				boolean nonUniqueIndex = rs.getBoolean("NON_UNIQUE");
 				if (nonUniqueIndex) {
@@ -197,7 +190,7 @@ public class JDBCModelReader implements ModelReader {
 				return index;
 			}
 		}
-		DBIndex index = this.factory.createIndex(name, new ArrayList<>());
+		DBIndex index = factory.createIndex(name, new ArrayList<>());
 		table.getIndices().add(index);
 		return index;
 	}

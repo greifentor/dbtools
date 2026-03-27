@@ -143,7 +143,7 @@ class LiquibaseFileModelReaderTest {
 		DBTable table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
-		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>());
+		DBDataScheme expected = new DBDataSchemeModel(tables, new ArrayList<>(), new ArrayList<>());
 
 		// Ausführung
 		DBDataScheme returned = unitUnderTest.readModel();
