@@ -26,6 +26,8 @@ import org.apache.logging.log4j.Logger;
 public class DataCopier {
 
 	static Logger log = LogManager.getLogger(DataCopier.class);
+	static ForeignKeyRemover foreignKeyRemover;
+	static ForeignKeyRestorer foreignKeyRestorer;
 
 	private StatementBuilder statementBuilder;
 
@@ -36,7 +38,7 @@ public class DataCopier {
 	 */
 	public DataCopier(StatementBuilder statementBuilder) {
 		super();
-		statementBuilder = statementBuilder;
+		this.statementBuilder = statementBuilder;
 	}
 
 	public void copy(
@@ -51,16 +53,18 @@ public class DataCopier {
 			new DefaultDBObjectFactory(),
 			new DBTypeConverter(),
 			sourceConnection,
-			null,
+			schemeName,
 			includeTableNamePatterns
 		)
 			.readModel();
+		foreignKeyRemover.remove(model.getForeignKeys(), targetConnection, statementBuilder);
 		for (DBTable table : model.getTables()) {
 			if (deleteBeforeCopy) {
 				deleteTableData(table, targetConnection, tableNameMappings);
 			}
 			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 		}
+		foreignKeyRestorer.restore(model.getForeignKeys(), targetConnection, statementBuilder);
 	}
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -45,6 +46,12 @@ class DataCopierTest {
 	private String dbNameSource = "sourceDB";
 	private String dbNameTarget = "targetDB";
 
+	@Mock
+	private ForeignKeyRemover foreignKeyRemover;
+
+	@Mock
+	private ForeignKeyRestorer foreignKeyRestorer;
+
 	@BeforeAll
 	static void setUpClass() {
 		try {
@@ -60,6 +67,8 @@ class DataCopierTest {
 	void setUp() throws Exception {
 		connectionSource = getConnection(dbNameSource);
 		connectionTarget = getConnection(dbNameTarget);
+		unitUnderTest.foreignKeyRemover = foreignKeyRemover;
+		unitUnderTest.foreignKeyRestorer = foreignKeyRestorer;
 	}
 
 	private Connection getConnection(String dbName) throws Exception {
