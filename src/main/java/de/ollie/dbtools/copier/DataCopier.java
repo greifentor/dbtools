@@ -39,33 +39,13 @@ public class DataCopier {
 		this.statementBuilder = statementBuilder;
 	}
 
-	/**
-	 * Copies the data from the source to the target JDBC connection.
-	 *
-	 * <P>
-	 * <B>Note:</B> the data schemes of the two databases referenced by the
-	 * connection should be equal. In minimum the tables and fields of the source
-	 * database must be members of the target database.
-	 *
-	 * @param sourceConnection         The connection which the data are read from.
-	 * @param targetConnection         The connection which the data are to write
-	 *                                 into.
-	 * @param deleteBeforeCopy         Set this flag to delete all data from the
-	 *                                 tables in the target connection. Not that
-	 *                                 only the data of those tables are deleted
-	 *                                 which are included by the copy process.
-	 * @param tableNameMappings        A map with mappings for table names which
-	 *                                 differs in source and target scheme.
-	 * @param includeTableNamePatterns A list with the table name patterns. Only one
-	 *                                 have to match to import a table.
-	 * @throws Exception If an error occurs while copying the data.
-	 */
 	public void copy(
 		Connection sourceConnection,
 		Connection targetConnection,
 		boolean deleteBeforeCopy,
 		List<String> includeTableNamePatterns,
-		Map<String, String> tableNameMappings
+		Map<String, String> tableNameMappings,
+		String schemeName
 	) throws Exception {
 		DBDataScheme model = new JDBCModelReader(
 			new DefaultDBObjectFactory(),

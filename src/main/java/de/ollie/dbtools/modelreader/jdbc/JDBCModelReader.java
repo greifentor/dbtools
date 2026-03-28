@@ -26,6 +26,8 @@ import java.util.List;
 
 public class JDBCModelReader implements ModelReader {
 
+	static JDBCForeignKeyReader foreignKeyReader = new JDBCForeignKeyReader();
+
 	private Connection connection;
 	private DBObjectFactory factory;
 	private List<String> includeTableNamePatterns;
@@ -67,7 +69,7 @@ public class JDBCModelReader implements ModelReader {
 		DatabaseMetaData dbmd = connection.getMetaData();
 		List<DBTable> tables = getTables(dbmd);
 		List<DBSequence> sequences = getSequences(dbmd);
-		return factory.createDataScheme(tables, sequences, new ArrayList<>());
+		return factory.createDataScheme(tables, sequences, foreignKeyReader.getForeignKeys(dbmd, schemeName, tables));
 	}
 
 	private List<DBTable> getTables(DatabaseMetaData dbmd) throws SQLException {

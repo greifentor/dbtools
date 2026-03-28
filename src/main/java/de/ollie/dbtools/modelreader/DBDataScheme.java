@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DBDataScheme {
-	void addForeignKey(DBForeignKey... dbForeignKeys);
+	void addForeignKey(DBForeignKey<?>... dbForeignKeys);
 
 	void addTables(DBTable... dbTables);
 
@@ -14,5 +14,5 @@ public interface DBDataScheme {
 
 	List<DBSequence> getSequences();
 
-	List<DBForeignKey> getForeignKeys();
+	List<DBForeignKey<?>> getForeignKeys();
 }

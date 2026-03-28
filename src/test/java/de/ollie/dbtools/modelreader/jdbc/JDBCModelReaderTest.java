@@ -8,6 +8,10 @@
 package de.ollie.dbtools.modelreader.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
@@ -21,6 +25,7 @@ import de.ollie.dbtools.modelreader.models.DBDataSchemeModel;
 import de.ollie.dbtools.modelreader.models.DBTableModel;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -82,6 +87,11 @@ class JDBCModelReaderTest {
 	void setUp() throws Exception {
 		connectionSource = getConnection(dbNameSource);
 		unitUnderTest = new JDBCModelReader(factory, typeConverter, connectionSource, null, Arrays.asList("*"));
+		JDBCForeignKeyReader foreignKeyReader = mock(JDBCForeignKeyReader.class);
+		unitUnderTest.foreignKeyReader = foreignKeyReader;
+		lenient()
+			.when(foreignKeyReader.getForeignKeys(any(DatabaseMetaData.class), anyString(), any(List.class)))
+			.thenReturn(new ArrayList<>());
 	}
 
 	Connection getConnection(String dbName) throws Exception {

@@ -17,7 +17,7 @@ public class DefaultDBObjectFactory implements DBObjectFactory {
 	public DBDataScheme createDataScheme(
 		List<DBTable> tables,
 		List<DBSequence> sequences,
-		List<DBForeignKey> foreignKeys
+		List<DBForeignKey<?>> foreignKeys
 	) {
 		return new DBDataSchemeModel(tables, sequences, foreignKeys);
 	}

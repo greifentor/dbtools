@@ -66,14 +66,6 @@ class JDBCForeignKeyReaderTest {
 		}
 
 		@Test
-		void throwsAnException_passingANullValue_asSchemeName() {
-			assertThrows(
-				IllegalArgumentException.class,
-				() -> unitUnderTest.getForeignKeys(databaseMetaData, null, List.of())
-			);
-		}
-
-		@Test
 		void returnsTheForeignKeysOfAllPassedTables() throws Exception {
 			// Prepare
 			List<DBForeignKey<?>> expected = List.of(

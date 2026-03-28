@@ -20,7 +20,7 @@ public class DBDataSchemeModel implements DBDataScheme {
 
 	private List<DBTable> tables = new ArrayList<>();
 	private List<DBSequence> sequences = new ArrayList<>();
-	private List<DBForeignKey> foreignKeys = new ArrayList<>();
+	private List<DBForeignKey<?>> foreignKeys = new ArrayList<>();
 
 	@Override
 	public void addTables(DBTable... dbTables) {
@@ -35,8 +35,8 @@ public class DBDataSchemeModel implements DBDataScheme {
 	}
 
 	@Override
-	public void addForeignKey(DBForeignKey... dbForeignKeys) {
-		for (DBForeignKey fk : dbForeignKeys) {
+	public void addForeignKey(DBForeignKey<?>... dbForeignKeys) {
+		for (DBForeignKey<?> fk : dbForeignKeys) {
 			foreignKeys.add(fk);
 		}
 	}

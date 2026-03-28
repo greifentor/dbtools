@@ -28,9 +28,16 @@ public class CopyCommand implements Command {
 	static Logger log = LogManager.getLogger(CopyCommand.class);
 
 	@Parameter(
+		names = { "--schemeName" },
+		required = false,
+		description = "The name of the scheme. If not passed it's null."
+	)
+	private String schemeName = null;
+
+	@Parameter(
 		names = { "--sourceDriver" },
 		required = true,
-		description = "The qualified class name of the JDBC driver for the " + "source database."
+		description = "The qualified class name of the JDBC driver for the source database."
 	)
 	private String sourceDriverClassName;
 
@@ -107,7 +114,7 @@ public class CopyCommand implements Command {
 			Connection sourceConnection = getConnection(sourceDriverClassName, sourceURL, sourceUserName, sourceUserPassword);
 			Connection targetConnection = getConnection(targetDriverClassName, targetURL, targetUserName, targetUserPassword);
 			new DataCopier(new StatementBuilder())
-				.copy(sourceConnection, targetConnection, true, includeTableNamePatterns, mapTableNameMappings);
+				.copy(sourceConnection, targetConnection, true, includeTableNamePatterns, mapTableNameMappings, schemeName);
 		} catch (Exception e) {
 			log.error("error while copying data: " + e.getMessage(), e);
 		}

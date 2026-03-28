@@ -88,7 +88,7 @@ class DataCopierTest {
 		insertData(connectionSource, 1, "eins", 1.11111F);
 		insertData(connectionSource, 2, "zwei", 2.2F);
 		// Run
-		unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), null);
+		unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), null, null);
 		// Check
 		assertEquals(count(connectionTarget, TABLE_NAME_1), 2);
 	}
@@ -154,7 +154,7 @@ class DataCopierTest {
 		Map<String, String> tableNameMapping = new HashMap<>();
 		tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
 		// Run
-		unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), tableNameMapping);
+		unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), tableNameMapping, null);
 		// Check
 		assertEquals(count(connectionTarget, pappnase), 2);
 	}

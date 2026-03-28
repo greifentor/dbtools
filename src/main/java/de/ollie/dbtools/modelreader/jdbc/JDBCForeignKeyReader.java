@@ -17,7 +17,6 @@ class JDBCForeignKeyReader {
 	List<DBForeignKey<?>> getForeignKeys(DatabaseMetaData dbmd, String schemeName, List<DBTable> tables)
 		throws SQLException {
 		ensure(dbmd != null, "dbmd cannot be null!");
-		ensure(schemeName != null, "scheme name cannot be null!");
 		ensure(tables != null, "tables cannot be null!");
 		Map<String, DBForeignKey<?>> foreignKeys = new HashMap<>();
 		for (DBTable table : tables) {
