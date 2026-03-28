@@ -36,7 +36,7 @@ public class DataCopier {
 	 */
 	public DataCopier(StatementBuilder statementBuilder) {
 		super();
-		this.statementBuilder = statementBuilder;
+		statementBuilder = statementBuilder;
 	}
 
 	public void copy(
@@ -83,8 +83,8 @@ public class DataCopier {
 		Map<String, String> tableNameMappings
 	) throws SQLException {
 		String tableName = getMappedTableName(table, tableNameMappings);
-		String select = this.statementBuilder.createSelectStatementString(table);
-		String insert = this.statementBuilder.createInsertStatementString(table, tableName);
+		String select = statementBuilder.createSelectStatementString(table);
+		String insert = statementBuilder.createInsertStatementString(table, tableName);
 		Statement sourceStatement = sourceConnection.createStatement();
 		PreparedStatement targetStatement = targetConnection.prepareStatement(insert);
 		ResultSet rs = sourceStatement.executeQuery(select);

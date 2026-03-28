@@ -1,24 +1,39 @@
 package de.ollie.dbtools.utils;
 
+import static de.ollie.dbtools.utils.Check.ensure;
+
 import de.ollie.dbtools.modelreader.DBColumn;
+import de.ollie.dbtools.modelreader.DBForeignKey;
 import de.ollie.dbtools.modelreader.DBTable;
 import java.util.Objects;
 
-/**
- * A class which is able to build several statement strings for a table model.
- *
- * @author Oliver.Lieshoff
- *
- */
 public class StatementBuilder {
 
-	/**
-	 * Build a select statement string for the passed table model.
-	 *
-	 * @param table The table model which the statement is to build for.
-	 * @return A select statement for the passed table model.
-	 * @throws NullPointerException Passing a null value as table.
-	 */
+	public String createAddForeignKeyStatementString(DBForeignKey<?> foreignKey) {
+		ensure(foreignKey != null, "foreign key cannot be null!");
+		// TODO PostgreSQL only
+		return (
+			"ALTER TABLE " +
+			foreignKey.getTableName() +
+			" ADD CONSTRAINT " +
+			foreignKey.getName() +
+			"FOREIGN KEY (" +
+			foreignKey.getKeyColumnNames().stream().reduce((s0, s1) -> s0 + "," + s1).orElse("") +
+			") " +
+			"REFERENCES " +
+			foreignKey.getReferencedTableName() +
+			"(" +
+			foreignKey.getReferencedKeyColumnNames().stream().reduce((s0, s1) -> s0 + "," + s1).orElse("") +
+			")"
+		);
+	}
+
+	public String createDropForeignKeyStatementString(DBForeignKey<?> foreignKey) {
+		ensure(foreignKey != null, "foreign key cannot be null!");
+		// TODO PostgreSQL only
+		return "ALTER TABLE " + foreignKey.getTableName() + " DROP CONSTRAINT " + foreignKey.getName();
+	}
+
 	public String createSelectStatementString(DBTable table) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
@@ -37,25 +52,10 @@ public class StatementBuilder {
 		return sb.toString();
 	}
 
-	/**
-	 * Build an insert statement string for the passed table model with '?' characters instead of values.
-	 *
-	 * @param table The table model which the statement is to build for.
-	 * @return An insert statement for the passed table model.
-	 * @throws NullPointerException Passing a null value as table.
-	 */
 	public String createInsertStatementString(DBTable table) {
 		return createInsertStatementString(table, null);
 	}
 
-	/**
-	 * Build an insert statement string for the passed table model with '?' characters instead of values.
-	 *
-	 * @param table                The table model which the statement is to build for.
-	 * @param alternativeTableName An alternative table name.
-	 * @return An insert statement for the passed table model.
-	 * @throws NullPointerException Passing a null value as table.
-	 */
 	public String createInsertStatementString(DBTable table, String alternativeTableName) {
 		Objects.requireNonNull(table);
 		if (table.getColumns().isEmpty()) {
