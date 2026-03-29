@@ -86,7 +86,7 @@ class JDBCModelReaderTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		connectionSource = getConnection(dbNameSource);
-		unitUnderTest = new JDBCModelReader(factory, typeConverter, connectionSource, null, Arrays.asList("*"));
+		unitUnderTest = new JDBCModelReader(factory, typeConverter, connectionSource, null, Arrays.asList("*"), List.of());
 		JDBCForeignKeyReader foreignKeyReader = mock(JDBCForeignKeyReader.class);
 		unitUnderTest.foreignKeyReader = foreignKeyReader;
 		lenient()

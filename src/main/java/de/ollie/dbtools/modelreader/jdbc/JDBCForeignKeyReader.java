@@ -26,6 +26,7 @@ class JDBCForeignKeyReader {
 					if (foreignKeys.containsKey(fkName)) {
 						foreignKeys.get(fkName).addColumnNames(fks.getString("FKCOLUMN_NAME"), fks.getString("PKCOLUMN_NAME"));
 					} else {
+						System.out.println("read foreignkey: " + fkName);
 						foreignKeys.put(
 							fkName,
 							new DBForeignKeyModel(

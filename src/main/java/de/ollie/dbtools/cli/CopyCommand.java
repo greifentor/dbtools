@@ -101,6 +101,13 @@ public class CopyCommand implements Command {
 	)
 	private String tableNameMappings;
 
+	@Parameter(
+		names = { "--excludeTables" },
+		required = false,
+		description = "Table names (comma separated) which are to exclude."
+	)
+	private String excludeTables;
+
 	@Override
 	public String getCommand() {
 		return "copy";
@@ -109,12 +116,21 @@ public class CopyCommand implements Command {
 	@Override
 	public int run(MainParameters mainCommand) {
 		try {
+			List<String> excludeTableNames = getExcludes(excludeTables);
 			List<String> includeTableNamePatterns = getIncludes(tableNamePattern);
 			Map<String, String> mapTableNameMappings = getTableNameMappings(tableNameMappings);
 			Connection sourceConnection = getConnection(sourceDriverClassName, sourceURL, sourceUserName, sourceUserPassword);
 			Connection targetConnection = getConnection(targetDriverClassName, targetURL, targetUserName, targetUserPassword);
 			new DataCopier(new StatementBuilder())
-				.copy(sourceConnection, targetConnection, true, includeTableNamePatterns, mapTableNameMappings, schemeName);
+				.copy(
+					sourceConnection,
+					targetConnection,
+					false,
+					includeTableNamePatterns,
+					excludeTableNames,
+					mapTableNameMappings,
+					schemeName
+				);
 		} catch (Exception e) {
 			log.error("error while copying data: " + e.getMessage(), e);
 		}
@@ -126,6 +142,13 @@ public class CopyCommand implements Command {
 			return Arrays.asList("*");
 		}
 		return Arrays.asList(StringUtils.split(includeTableNamePatterns, ','));
+	}
+
+	private List<String> getExcludes(String excludeTableNames) {
+		if (excludeTableNames == null) {
+			return List.of();
+		}
+		return Arrays.asList(StringUtils.split(excludeTableNames, ','));
 	}
 
 	private Map<String, String> getTableNameMappings(String s) {

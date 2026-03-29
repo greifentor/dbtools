@@ -56,9 +56,9 @@ class StatementBuilderTest {
 			String expected =
 				"ALTER TABLE " +
 				TABLE_NAME +
-				" ADD CONSTRAINT " +
+				" ADD CONSTRAINT \"" +
 				FK_NAME +
-				"FOREIGN KEY (" +
+				"\" FOREIGN KEY (" +
 				FK_COLUMN_NAMES +
 				") " +
 				"REFERENCES " +
@@ -91,7 +91,7 @@ class StatementBuilderTest {
 		@Test
 		void returnsTheCorrectStatemen_passingADBForeignKey() {
 			// Prepare
-			String expected = "ALTER TABLE " + TABLE_NAME + " DROP CONSTRAINT " + FK_NAME;
+			String expected = "ALTER TABLE " + TABLE_NAME + " DROP CONSTRAINT IF EXISTS \"" + FK_NAME + "\"";
 			DBForeignKey<?> fk = mock(DBForeignKey.class);
 			when(fk.getName()).thenReturn(FK_NAME);
 			when(fk.getTableName()).thenReturn(TABLE_NAME);

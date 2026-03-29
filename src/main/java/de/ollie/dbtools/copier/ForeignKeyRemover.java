@@ -12,7 +12,9 @@ class ForeignKeyRemover {
 	void remove(List<DBForeignKey<?>> foreignKeys, Connection c, StatementBuilder statementBuilder) throws SQLException {
 		for (DBForeignKey<?> fk : foreignKeys) {
 			try (Statement stmt = c.createStatement()) {
-				stmt.execute(statementBuilder.createDropForeignKeyStatementString(fk));
+				String s = statementBuilder.createDropForeignKeyStatementString(fk);
+				System.out.println("running: " + s);
+				stmt.execute(s);
 			}
 		}
 	}

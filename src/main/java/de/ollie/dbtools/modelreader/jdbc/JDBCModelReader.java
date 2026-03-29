@@ -30,35 +30,23 @@ public class JDBCModelReader implements ModelReader {
 
 	private Connection connection;
 	private DBObjectFactory factory;
+	private List<String> excludeTableNames;
 	private List<String> includeTableNamePatterns;
 	private String schemeName;
 	private DBTypeConverter typeConverter;
 
-	/**
-	 * Creates a new model reader with the passed parameters.
-	 *
-	 * @param factory                  An object factory implementation to create
-	 *                                 the DB objects.
-	 * @param typeConverter            A converter for database types.
-	 * @param connection               The connection whose data model should be
-	 *                                 read.
-	 * @param schemeName               The name of the scheme whose data are to read
-	 *                                 (pass "null" to ignore scheme and load all
-	 *                                 tables).
-	 * @param includeTableNamePatterns A list with the table name patterns. Only one
-	 *                                 have to match to import a table.
-	 * @throws IllegalArgumentException Passing null value.
-	 */
 	public JDBCModelReader(
 		DBObjectFactory factory,
 		DBTypeConverter typeConverter,
 		Connection connection,
 		String schemeName,
-		List<String> includeTableNamePatterns
+		List<String> includeTableNamePatterns,
+		List<String> excludeTableNames
 	) {
 		super();
 		this.connection = connection;
 		this.factory = factory;
+		this.excludeTableNames = excludeTableNames;
 		this.includeTableNamePatterns = includeTableNamePatterns;
 		this.schemeName = schemeName;
 		this.typeConverter = typeConverter;
@@ -84,7 +72,7 @@ public class JDBCModelReader implements ModelReader {
 		ResultSet rs = dbmd.getTables(null, schemeName, "%", new String[] { "TABLE" });
 		while (rs.next()) {
 			String tableName = rs.getString("TABLE_NAME");
-			if (isMatchingImportOnlyPattern(tableName)) {
+			if (isMatchingImportOnlyPattern(tableName) && !isInExcludeList(tableName)) {
 				tables.add(factory.createTable(tableName, new ArrayList<>(), new ArrayList<>()));
 				System.out.println(LocalDateTime.now() + " - table added: " + rs.getString("TABLE_SCHEM") + "." + tableName);
 			}
@@ -110,6 +98,10 @@ public class JDBCModelReader implements ModelReader {
 			}
 		}
 		return false;
+	}
+
+	private boolean isInExcludeList(String tableNameToCheck) {
+		return excludeTableNames.contains(tableNameToCheck);
 	}
 
 	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {

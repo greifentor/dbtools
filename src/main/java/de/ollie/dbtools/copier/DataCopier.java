@@ -26,8 +26,8 @@ import org.apache.logging.log4j.Logger;
 public class DataCopier {
 
 	static Logger log = LogManager.getLogger(DataCopier.class);
-	static ForeignKeyRemover foreignKeyRemover;
-	static ForeignKeyRestorer foreignKeyRestorer;
+	static ForeignKeyRemover foreignKeyRemover = new ForeignKeyRemover();
+	static ForeignKeyRestorer foreignKeyRestorer = new ForeignKeyRestorer();
 
 	private StatementBuilder statementBuilder;
 
@@ -46,6 +46,7 @@ public class DataCopier {
 		Connection targetConnection,
 		boolean deleteBeforeCopy,
 		List<String> includeTableNamePatterns,
+		List<String> excludeTableNames,
 		Map<String, String> tableNameMappings,
 		String schemeName
 	) throws Exception {
@@ -54,7 +55,8 @@ public class DataCopier {
 			new DBTypeConverter(),
 			sourceConnection,
 			schemeName,
-			includeTableNamePatterns
+			includeTableNamePatterns,
+			excludeTableNames
 		)
 			.readModel();
 		foreignKeyRemover.remove(model.getForeignKeys(), targetConnection, statementBuilder);
@@ -70,7 +72,9 @@ public class DataCopier {
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)
 		throws Exception {
 		try (Statement statement = connection.createStatement()) {
-			statement.executeUpdate("DELETE FROM " + getMappedTableName(table, tableNameMappings));
+			String stmt = "DELETE FROM " + getMappedTableName(table, tableNameMappings);
+			System.out.println("running: " + stmt);
+			statement.executeUpdate(stmt);
 		}
 	}
 
@@ -91,8 +95,9 @@ public class DataCopier {
 		String insert = statementBuilder.createInsertStatementString(table, tableName);
 		Statement sourceStatement = sourceConnection.createStatement();
 		PreparedStatement targetStatement = targetConnection.prepareStatement(insert);
-		ResultSet rs = sourceStatement.executeQuery(select);
 		long count = count(table.getName(), sourceConnection);
+		System.out.print("copying: " + tableName + " with " + count + " record(s) ");
+		ResultSet rs = sourceStatement.executeQuery(select);
 		long current = 0;
 		while (rs.next()) {
 			for (int i = 0, leni = rs.getMetaData().getColumnCount(); i < leni; i++) {
@@ -100,6 +105,9 @@ public class DataCopier {
 			}
 			targetStatement.executeUpdate();
 			current++;
+			if (current % 100 == 0) {
+				System.out.print(".");
+			}
 			log.info(
 				"copied record number " +
 				current +
@@ -113,6 +121,7 @@ public class DataCopier {
 		rs.close();
 		sourceStatement.close();
 		targetStatement.close();
+		System.out.println(" ready.");
 	}
 
 	private long count(String tableName, Connection connection) throws SQLException {

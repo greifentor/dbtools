@@ -100,7 +100,7 @@ class DataCopierTest {
 			insertData(connectionSource, 1, "eins", 1.11111F);
 			insertData(connectionSource, 2, "zwei", 2.2F);
 			// Run
-			unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), null, null);
+			unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), List.of(), null, null);
 			// Check
 			assertEquals(2, count(connectionTarget, TABLE_NAME_1));
 		}
@@ -166,7 +166,15 @@ class DataCopierTest {
 			Map<String, String> tableNameMapping = new HashMap<>();
 			tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
 			// Run
-			unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), tableNameMapping, null);
+			unitUnderTest.copy(
+				connectionSource,
+				connectionTarget,
+				true,
+				Arrays.asList("*"),
+				List.of(),
+				tableNameMapping,
+				null
+			);
 			// Check
 			assertEquals(2, count(connectionTarget, pappnase));
 		}
@@ -182,7 +190,15 @@ class DataCopierTest {
 			Map<String, String> tableNameMapping = new HashMap<>();
 			tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
 			// Run
-			unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), tableNameMapping, null);
+			unitUnderTest.copy(
+				connectionSource,
+				connectionTarget,
+				true,
+				Arrays.asList("*"),
+				List.of(),
+				tableNameMapping,
+				null
+			);
 			// Check
 			verify(foreignKeyRemover, times(1)).remove(eq(List.of()), eq(connectionTarget), any(StatementBuilder.class));
 		}
@@ -198,7 +214,15 @@ class DataCopierTest {
 			Map<String, String> tableNameMapping = new HashMap<>();
 			tableNameMapping.put(TABLE_NAME_1.toUpperCase(), pappnase);
 			// Run
-			unitUnderTest.copy(connectionSource, connectionTarget, true, Arrays.asList("*"), tableNameMapping, null);
+			unitUnderTest.copy(
+				connectionSource,
+				connectionTarget,
+				true,
+				Arrays.asList("*"),
+				List.of(),
+				tableNameMapping,
+				null
+			);
 			// Check
 			verify(foreignKeyRestorer, times(1)).restore(eq(List.of()), eq(connectionTarget), any(StatementBuilder.class));
 		}

@@ -15,9 +15,9 @@ public class StatementBuilder {
 		return (
 			"ALTER TABLE " +
 			foreignKey.getTableName() +
-			" ADD CONSTRAINT " +
+			" ADD CONSTRAINT \"" +
 			foreignKey.getName() +
-			"FOREIGN KEY (" +
+			"\" FOREIGN KEY (" +
 			foreignKey.getKeyColumnNames().stream().reduce((s0, s1) -> s0 + "," + s1).orElse("") +
 			") " +
 			"REFERENCES " +
@@ -31,7 +31,7 @@ public class StatementBuilder {
 	public String createDropForeignKeyStatementString(DBForeignKey<?> foreignKey) {
 		ensure(foreignKey != null, "foreign key cannot be null!");
 		// TODO PostgreSQL only
-		return "ALTER TABLE " + foreignKey.getTableName() + " DROP CONSTRAINT " + foreignKey.getName();
+		return "ALTER TABLE " + foreignKey.getTableName() + " DROP CONSTRAINT IF EXISTS \"" + foreignKey.getName() + "\"";
 	}
 
 	public String createSelectStatementString(DBTable table) {

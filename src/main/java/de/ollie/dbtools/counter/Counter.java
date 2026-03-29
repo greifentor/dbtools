@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * A class which counts the records of all tables in a database.
@@ -31,7 +32,8 @@ public class Counter {
 			new DBTypeConverter(),
 			connection,
 			schemeName,
-			null
+			null,
+			List.of()
 		)
 			.readModel();
 		int maxlen = 0;

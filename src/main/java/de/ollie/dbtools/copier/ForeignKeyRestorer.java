@@ -12,7 +12,9 @@ class ForeignKeyRestorer {
 	void restore(List<DBForeignKey<?>> foreignKeys, Connection c, StatementBuilder statementBuilder) throws SQLException {
 		for (DBForeignKey<?> fk : foreignKeys) {
 			try (Statement stmt = c.createStatement()) {
-				stmt.execute(statementBuilder.createAddForeignKeyStatementString(fk));
+				String s = statementBuilder.createAddForeignKeyStatementString(fk);
+				System.out.println("running: " + s);
+				stmt.execute(s);
 			}
 		}
 	}
