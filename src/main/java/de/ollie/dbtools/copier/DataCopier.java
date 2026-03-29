@@ -69,9 +69,9 @@ public class DataCopier {
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)
 		throws Exception {
-		Statement statement = connection.createStatement();
-		statement.executeUpdate("DELETE FROM " + getMappedTableName(table, tableNameMappings));
-		statement.close();
+		try (Statement statement = connection.createStatement()) {
+			statement.executeUpdate("DELETE FROM " + getMappedTableName(table, tableNameMappings));
+		}
 	}
 
 	private String getMappedTableName(DBTable table, Map<String, String> tableNameMappings) {

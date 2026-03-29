@@ -41,7 +41,7 @@ public class StatementBuilder {
 		}
 		StringBuilder sb = new StringBuilder("");
 		for (DBColumn column : table.getColumns()) {
-			if (sb.length() > 0) {
+			if (!sb.isEmpty()) {
 				sb.append(", ");
 			} else {
 				sb.append("SELECT ");
@@ -63,7 +63,7 @@ public class StatementBuilder {
 		}
 		StringBuilder sb = new StringBuilder("");
 		for (DBColumn column : table.getColumns()) {
-			if (sb.length() > 0) {
+			if (!sb.isEmpty()) {
 				sb.append(", ");
 			} else {
 				sb
@@ -80,7 +80,7 @@ public class StatementBuilder {
 	private String createPlaceHolders(DBTable table) {
 		StringBuilder sb = new StringBuilder("");
 		for (int i = 0, leni = table.getColumns().size(); i < leni; i++) {
-			if (sb.length() > 0) {
+			if (!sb.isEmpty()) {
 				sb.append(", ");
 			}
 			sb.append("?");
