@@ -68,7 +68,7 @@ public class DataCopier {
 			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 		}
 		foreignKeyRestorer.restore(model.getForeignKeys(), targetConnection, statementBuilder);
-		sequenceUpater.update(model.getSequences(), targetConnection);
+		sequenceUpater.update(schemeName, targetConnection);
 	}
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)

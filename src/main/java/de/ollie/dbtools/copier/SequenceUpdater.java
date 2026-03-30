@@ -1,6 +1,7 @@
 package de.ollie.dbtools.copier;
 
 import de.ollie.dbtools.modelreader.DBSequence;
+import de.ollie.dbtools.modelreader.jdbc.JDBCSequenceReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +10,8 @@ import java.util.List;
 
 public class SequenceUpdater {
 
-	public void update(List<DBSequence> sequences, Connection connection) throws SQLException {
+	public void update(String schemeName, Connection connection) throws SQLException {
+		List<DBSequence> sequences = new JDBCSequenceReader().getSequences(schemeName, connection);
 		for (DBSequence sequence : sequences) {
 			int restartWith = count(sequence, connection) + 1;
 			try (Statement stmt = connection.createStatement()) {

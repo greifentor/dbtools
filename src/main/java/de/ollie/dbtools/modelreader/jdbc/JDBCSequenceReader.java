@@ -9,9 +9,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-class JDBCSequenceReader {
+public class JDBCSequenceReader {
 
-	List<DBSequence> getSequences(String schemeName, Connection connection) throws SQLException {
+	public List<DBSequence> getSequences(String schemeName, Connection connection) throws SQLException {
 		List<DBSequence> sequences = new ArrayList<>();
 		if (connection.getMetaData().getDriverName().toLowerCase().contains("postgre")) {
 			String sequenceReadStmtString =
