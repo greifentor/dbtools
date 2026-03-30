@@ -27,6 +27,7 @@ import java.util.List;
 public class JDBCModelReader implements ModelReader {
 
 	static JDBCForeignKeyReader foreignKeyReader = new JDBCForeignKeyReader();
+	static JDBCSequenceReader sequenceReader = new JDBCSequenceReader();
 
 	private Connection connection;
 	private DBObjectFactory factory;
@@ -56,7 +57,7 @@ public class JDBCModelReader implements ModelReader {
 	public DBDataScheme readModel() throws Exception {
 		DatabaseMetaData dbmd = connection.getMetaData();
 		List<DBTable> tables = getTables(dbmd);
-		List<DBSequence> sequences = getSequences(dbmd);
+		List<DBSequence> sequences = sequenceReader.getSequences(schemeName, connection);
 		return factory.createDataScheme(tables, sequences, foreignKeyReader.getForeignKeys(dbmd, schemeName, tables));
 	}
 
@@ -196,10 +197,5 @@ public class JDBCModelReader implements ModelReader {
 			}
 		}
 		throw new IllegalArgumentException("column '" + name + "' does not exist in table '" + table.getName() + "'.");
-	}
-
-	private List<DBSequence> getSequences(DatabaseMetaData dbmd) throws SQLException {
-		List<DBSequence> sequences = new ArrayList<>();
-		return sequences;
 	}
 }

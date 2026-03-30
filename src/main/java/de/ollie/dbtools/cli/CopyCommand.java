@@ -108,6 +108,13 @@ public class CopyCommand implements Command {
 	)
 	private String excludeTables;
 
+	@Parameter(
+		names = { "--deleteBeforeCopy" },
+		required = false,
+		description = "Set this flag to 'true', to remove data from the tables before copy."
+	)
+	private boolean deleteBeforeCopy;
+
 	@Override
 	public String getCommand() {
 		return "copy";
@@ -125,7 +132,7 @@ public class CopyCommand implements Command {
 				.copy(
 					sourceConnection,
 					targetConnection,
-					false,
+					deleteBeforeCopy,
 					includeTableNamePatterns,
 					excludeTableNames,
 					mapTableNameMappings,

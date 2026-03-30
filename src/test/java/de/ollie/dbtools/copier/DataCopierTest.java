@@ -52,6 +52,9 @@ class DataCopierTest {
 	@Mock
 	private ForeignKeyRestorer foreignKeyRestorer;
 
+	@Mock
+	private SequenceUpdater sequenceUpater;
+
 	@BeforeAll
 	static void setUpClass() {
 		try {
@@ -69,6 +72,7 @@ class DataCopierTest {
 		connectionTarget = getConnection(dbNameTarget);
 		unitUnderTest.foreignKeyRemover = foreignKeyRemover;
 		unitUnderTest.foreignKeyRestorer = foreignKeyRestorer;
+		unitUnderTest.sequenceUpater = sequenceUpater;
 	}
 
 	private Connection getConnection(String dbName) throws Exception {

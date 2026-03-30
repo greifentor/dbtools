@@ -5,16 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
-/**
- * A container for the sequence model.
- *
- * @author ollie
- *
- */
-@Getter
-@EqualsAndHashCode
+@Accessors(chain = true)
 @AllArgsConstructor
+@EqualsAndHashCode
+@Getter
 @ToString
 public class DBSequenceModel implements DBSequence {
 

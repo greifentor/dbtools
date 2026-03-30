@@ -28,6 +28,7 @@ public class DataCopier {
 	static Logger log = LogManager.getLogger(DataCopier.class);
 	static ForeignKeyRemover foreignKeyRemover = new ForeignKeyRemover();
 	static ForeignKeyRestorer foreignKeyRestorer = new ForeignKeyRestorer();
+	static SequenceUpdater sequenceUpater = new SequenceUpdater();
 
 	private StatementBuilder statementBuilder;
 
@@ -67,6 +68,7 @@ public class DataCopier {
 			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 		}
 		foreignKeyRestorer.restore(model.getForeignKeys(), targetConnection, statementBuilder);
+		sequenceUpater.update(model.getSequences(), targetConnection);
 	}
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)
