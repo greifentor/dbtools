@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class JDBCForeignKeyReader {
+public class JDBCForeignKeyReader {
 
-	List<DBForeignKey<?>> getForeignKeys(DatabaseMetaData dbmd, String schemeName, List<DBTable> tables)
+	public List<DBForeignKey<?>> getForeignKeys(DatabaseMetaData dbmd, String schemeName, List<DBTable> tables)
 		throws SQLException {
 		ensure(dbmd != null, "dbmd cannot be null!");
 		ensure(tables != null, "tables cannot be null!");

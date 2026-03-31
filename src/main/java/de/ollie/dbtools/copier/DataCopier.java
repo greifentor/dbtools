@@ -1,9 +1,11 @@
 package de.ollie.dbtools.copier;
 
 import de.ollie.dbtools.modelreader.DBDataScheme;
+import de.ollie.dbtools.modelreader.DBForeignKey;
 import de.ollie.dbtools.modelreader.DBTable;
 import de.ollie.dbtools.modelreader.DBTypeConverter;
 import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
+import de.ollie.dbtools.modelreader.jdbc.JDBCForeignKeyReader;
 import de.ollie.dbtools.modelreader.jdbc.JDBCModelReader;
 import de.ollie.dbtools.utils.StatementBuilder;
 import java.sql.Connection;
@@ -60,14 +62,16 @@ public class DataCopier {
 			excludeTableNames
 		)
 			.readModel();
-		foreignKeyRemover.remove(model.getForeignKeys(), targetConnection, statementBuilder);
+		List<DBForeignKey<?>> fksTargetDb = new JDBCForeignKeyReader()
+			.getForeignKeys(targetConnection.getMetaData(), schemeName, model.getTables());
+		foreignKeyRemover.remove(fksTargetDb, targetConnection, statementBuilder);
 		for (DBTable table : model.getTables()) {
 			if (deleteBeforeCopy) {
 				deleteTableData(table, targetConnection, tableNameMappings);
 			}
 			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 		}
-		foreignKeyRestorer.restore(model.getForeignKeys(), targetConnection, statementBuilder);
+		foreignKeyRestorer.restore(fksTargetDb, targetConnection, statementBuilder);
 		sequenceUpater.update(schemeName, targetConnection);
 	}
 
