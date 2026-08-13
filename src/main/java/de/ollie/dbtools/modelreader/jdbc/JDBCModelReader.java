@@ -108,6 +108,7 @@ public class JDBCModelReader implements ModelReader {
 	private void loadColumns(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {
 		for (DBTable table : tables) {
 			System.out.println(LocalDateTime.now() + " - reading columns for table: " + table.getName());
+			List<String> primaryKeyColumnNames = readPrimaryKeyColumnNames(dbmd, table);
 			ResultSet rs = dbmd.getColumns(null, schemeName, table.getName(), "%");
 			while (rs.next()) {
 				String columnName = rs.getString("COLUMN_NAME");
@@ -133,7 +134,14 @@ public class JDBCModelReader implements ModelReader {
 					table
 						.getColumns()
 						.add(
-							factory.createColumn(columnName, typeName, typeConverter.convert(dataType), columnSize, decimalDigits)
+							factory.createColumn(
+								columnName,
+								typeName,
+								typeConverter.convert(dataType),
+								columnSize,
+								decimalDigits,
+								primaryKeyColumnNames.contains(columnName)
+							)
 						);
 				} catch (Exception e) {
 					System.out.println(
@@ -154,6 +162,16 @@ public class JDBCModelReader implements ModelReader {
 			}
 			rs.close();
 		}
+	}
+
+	private List<String> readPrimaryKeyColumnNames(DatabaseMetaData dbmd, DBTable table) throws SQLException {
+		List<String> primaryKeyColumnNames = new ArrayList<>();
+		ResultSet rs = dbmd.getPrimaryKeys(null, schemeName, table.getName());
+		while (rs.next()) {
+			primaryKeyColumnNames.add(rs.getString("COLUMN_NAME"));
+		}
+		rs.close();
+		return primaryKeyColumnNames;
 	}
 
 	private void loadIndices(DatabaseMetaData dbmd, List<DBTable> tables) throws SQLException {

@@ -116,11 +116,16 @@ public class LiquibaseFileModelReader implements ModelReader {
 						type.getName(),
 						getDBType(type.getDataType()),
 						type.getColumnSize(),
-						type.getDecimalDigits()
+						type.getDecimalDigits(),
+						isPrimaryKey(cc)
 					)
 			);
 		}
 		return columns;
+	}
+
+	private boolean isPrimaryKey(ColumnConfig cc) {
+		return (cc.getConstraints() != null) && Boolean.TRUE.equals(cc.getConstraints().isPrimaryKey());
 	}
 
 	private DBType getDBType(int dataType) {
@@ -137,7 +142,8 @@ public class LiquibaseFileModelReader implements ModelReader {
 						type.getName(),
 						getDBType(type.getDataType()),
 						type.getColumnSize(),
-						type.getDecimalDigits()
+						type.getDecimalDigits(),
+						isPrimaryKey(cc)
 					)
 			);
 		}

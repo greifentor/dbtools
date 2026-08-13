@@ -110,9 +110,9 @@ class StatementBuilderTest {
 		// Prepare
 		String expected = "SELECT " + COLUMN_NAME_1 + ", " + COLUMN_NAME_2 + ", " + COLUMN_NAME_3 + " FROM " + TABLE_NAME_1;
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
 		String returned = unitUnderTest.createSelectStatementString(table);
@@ -151,9 +151,9 @@ class StatementBuilderTest {
 			COLUMN_NAME_3 +
 			") VALUES (?, ?, ?)";
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTableModel table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		// Run
 		String returned = unitUnderTest.createInsertStatementString(table);

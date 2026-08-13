@@ -29,4 +29,5 @@ public class DBColumnModel implements DBColumn {
 	private DBType type;
 	private int columnSize;
 	private int decimalDigits;
+	private boolean primaryKey;
 }
