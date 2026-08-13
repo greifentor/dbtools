@@ -43,4 +43,11 @@ public interface DBColumn {
 	 * @return A human readable name of the fields type.
 	 */
 	String getTypeName();
+
+	/**
+	 * Returns whether the column is a member of the primary key of its table.
+	 *
+	 * @return "true" if the column is a member of the primary key of its table.
+	 */
+	boolean isPrimaryKey();
 }

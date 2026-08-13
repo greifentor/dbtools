@@ -8,6 +8,7 @@
 package de.ollie.dbtools.modelreader.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -154,9 +155,9 @@ class JDBCModelReaderTest {
 		// Prepare
 		createDatabase(connectionSource);
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTable table = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
@@ -173,14 +174,14 @@ class JDBCModelReaderTest {
 		// Prepare
 		createDatabaseWithTwoTables(connectionSource);
 		List<DBColumn> columns1 = new ArrayList<>();
-		columns1.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1));
-		columns1.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns1.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns1.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns1.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns1.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTableModel table1 = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns1, new ArrayList<>());
 		List<DBColumn> columns2 = new ArrayList<>();
-		columns2.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1));
-		columns2.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns2.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns2.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns2.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns2.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTableModel table2 = new DBTableModel(TABLE_NAME_2.toUpperCase(), columns1, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table2);
@@ -225,11 +226,11 @@ class JDBCModelReaderTest {
 		// Prepare
 		createDatabaseWithATableWithFieldsAllTypes(connectionSource);
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2));
-		columns.add(new DBColumnModel(COLUMN_NAME_4.toUpperCase(), "CHARACTER", DBType.CHAR, 12, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_5.toUpperCase(), "DECIMAL", DBType.DECIMAL, 24, 12));
+		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_4.toUpperCase(), "CHARACTER", DBType.CHAR, 12, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_5.toUpperCase(), "DECIMAL", DBType.DECIMAL, 24, 12, false));
 		DBTableModel table = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
@@ -261,6 +262,42 @@ class JDBCModelReaderTest {
 	}
 
 	@Test
+	void readModel_ValidConnectionWithAPrimaryKeyOnTable_ReturnsTheModelWithAPrimaryKeyColumn() throws Exception {
+		// Prepare
+		createDatabaseWithAPrimaryKey(connectionSource);
+		// Run
+		DBDataScheme returned = unitUnderTest.readModel();
+		// Check
+		assertEquals(COLUMN_NAME_1.toUpperCase(), returned.getTables().get(0).findIdFieldName().get());
+	}
+
+	@Test
+	void readModel_ValidConnectionWithoutAPrimaryKeyOnTable_ReturnsTheModelWithoutAPrimaryKeyColumn() throws Exception {
+		// Prepare
+		createDatabase(connectionSource);
+		// Run
+		DBDataScheme returned = unitUnderTest.readModel();
+		// Check
+		assertTrue(returned.getTables().get(0).findIdFieldName().isEmpty());
+	}
+
+	private void createDatabaseWithAPrimaryKey(Connection connection) throws Exception {
+		Statement stmt = connection.createStatement();
+		stmt.execute(
+			"CREATE TABLE " +
+			TABLE_NAME_1 +
+			" (" +
+			COLUMN_NAME_1 +
+			" INTEGER PRIMARY KEY, " +
+			COLUMN_NAME_2 +
+			" VARCHAR(100), " +
+			COLUMN_NAME_3 +
+			" NUMERIC(10,2))"
+		);
+		stmt.close();
+	}
+
+	@Test
 	void readlModel_ValidConnectionWithAnIndexOnTable_ReturnsTheModelWithTheIndex() throws Exception {
 		// Prepare
 		Statement stmt = connectionSource.createStatement();
@@ -287,11 +324,11 @@ class JDBCModelReaderTest {
 		);
 		stmt.close();
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2));
-		columns.add(new DBColumnModel(COLUMN_NAME_4.toUpperCase(), "CHARACTER", DBType.CHAR, 12, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_5.toUpperCase(), "DECIMAL", DBType.DECIMAL, 24, 12));
+		columns.add(new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3.toUpperCase(), "NUMERIC", DBType.NUMERIC, 10, 2, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_4.toUpperCase(), "CHARACTER", DBType.CHAR, 12, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_5.toUpperCase(), "DECIMAL", DBType.DECIMAL, 24, 12, false));
 		DBTable table = new DBTableModel(TABLE_NAME_1.toUpperCase(), columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
@@ -303,11 +340,11 @@ class JDBCModelReaderTest {
 		assertEquals(INDEX_NAME.toUpperCase(), index.getName());
 		assertEquals(2, index.getColumns().size());
 		assertEquals(
-			new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1),
+			new DBColumnModel(COLUMN_NAME_1.toUpperCase(), "INTEGER", DBType.INTEGER, -1, -1, false),
 			index.getColumns().get(0)
 		);
 		assertEquals(
-			new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1),
+			new DBColumnModel(COLUMN_NAME_2.toUpperCase(), "VARCHAR", DBType.VARCHAR, 100, -1, false),
 			index.getColumns().get(1)
 		);
 	}

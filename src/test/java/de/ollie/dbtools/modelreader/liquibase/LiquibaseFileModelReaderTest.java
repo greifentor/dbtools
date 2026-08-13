@@ -137,9 +137,9 @@ class LiquibaseFileModelReaderTest {
 	void readModel_ModelWithOnlyOneTable_ReadsTheModelFromTheFiles() throws Exception {
 		// Vorbereitung
 		List<DBColumn> columns = new ArrayList<>();
-		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1));
-		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2));
+		columns.add(new DBColumnModel(COLUMN_NAME_1, "INTEGER", DBType.INTEGER, -1, -1, true));
+		columns.add(new DBColumnModel(COLUMN_NAME_2, "VARCHAR", DBType.VARCHAR, 100, -1, false));
+		columns.add(new DBColumnModel(COLUMN_NAME_3, "NUMERIC", DBType.NUMERIC, 10, 2, false));
 		DBTable table = new DBTableModel(TABLE_NAME_1, columns, new ArrayList<>());
 		List<DBTable> tables = new ArrayList<>();
 		tables.add(table);
@@ -150,5 +150,13 @@ class LiquibaseFileModelReaderTest {
 
 		// Prüfung
 		assertEquals(expected.toString(), returned.toString());
+	}
+
+	@Test
+	void readModel_ModelWithAPrimaryKeyConstraint_ReadsThePrimaryKeyColumnFromTheFiles() throws Exception {
+		// Ausführung
+		DBDataScheme returned = unitUnderTest.readModel();
+		// Prüfung
+		assertEquals(COLUMN_NAME_1, returned.getTables().get(0).findIdFieldName().get());
 	}
 }

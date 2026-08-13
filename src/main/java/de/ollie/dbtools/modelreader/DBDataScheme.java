@@ -10,6 +10,10 @@ public interface DBDataScheme {
 
 	Optional<DBTable> getTableByName(String name);
 
+	default Optional<DBTable> findByName(String tableName) {
+		return getTables().stream().filter(table -> table.getName().equals(tableName)).findFirst();
+	}
+
 	List<DBTable> getTables();
 
 	List<DBSequence> getSequences();

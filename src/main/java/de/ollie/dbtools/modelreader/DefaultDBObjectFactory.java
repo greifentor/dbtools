@@ -9,8 +9,15 @@ import java.util.List;
 public class DefaultDBObjectFactory implements DBObjectFactory {
 
 	@Override
-	public DBColumn createColumn(String columnName, String typeName, DBType dataType, int columnSize, int decimalDigits) {
-		return new DBColumnModel(columnName, typeName, dataType, columnSize, decimalDigits);
+	public DBColumn createColumn(
+		String columnName,
+		String typeName,
+		DBType dataType,
+		int columnSize,
+		int decimalDigits,
+		boolean primaryKey
+	) {
+		return new DBColumnModel(columnName, typeName, dataType, columnSize, decimalDigits, primaryKey);
 	}
 
 	@Override

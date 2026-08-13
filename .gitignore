@@ -26,3 +26,4 @@ hs_err_pid*
 /.classpath
 /target\generated-sources\annotations/
 /target\generated-test-sources\test-annotations/
+/.project

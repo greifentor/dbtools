@@ -72,7 +72,7 @@ public class DataCopier {
 			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 		}
 		foreignKeyRestorer.restore(fksTargetDb, targetConnection, statementBuilder);
-		sequenceUpater.update(schemeName, targetConnection);
+		sequenceUpater.update(schemeName, targetConnection, model);
 	}
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)

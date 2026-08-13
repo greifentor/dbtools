@@ -3,7 +3,14 @@ package de.ollie.dbtools.modelreader;
 import java.util.List;
 
 public interface DBObjectFactory {
-	DBColumn createColumn(String columnName, String typeName, DBType dataType, int columnSize, int decimalDigits);
+	DBColumn createColumn(
+		String columnName,
+		String typeName,
+		DBType dataType,
+		int columnSize,
+		int decimalDigits,
+		boolean primaryKey
+	);
 
 	DBDataScheme createDataScheme(List<DBTable> tables, List<DBSequence> sequences, List<DBForeignKey<?>> foreignKeys);
 

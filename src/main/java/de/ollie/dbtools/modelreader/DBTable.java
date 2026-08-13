@@ -1,6 +1,7 @@
 package de.ollie.dbtools.modelreader;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An interface for the tables of a data scheme.
@@ -31,4 +32,8 @@ public interface DBTable {
 	 * @return The name of the table.
 	 */
 	String getName();
+
+	default Optional<String> findIdFieldName() {
+		return getColumns().stream().filter(DBColumn::isPrimaryKey).map(DBColumn::getName).findFirst();
+	}
 }
