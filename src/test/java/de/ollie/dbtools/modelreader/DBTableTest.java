@@ -3,6 +3,7 @@ package de.ollie.dbtools.modelreader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,22 +17,62 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DBTableTest {
 
+	@Mock
+	private DBColumn column;
+
+	@Mock
+	private DBColumn primaryKeyColumn;
+
+	@Mock
+	private DBColumn anotherPrimaryKeyColumn;
+
 	@Spy
 	private DBTable unitUnderTest;
+
+	@Nested
+	class findAllPrimaryKeyMembers {
+
+		@Test
+		void returnsAnEmptyList_whenDBColumnListIsNull() {
+			// Prepare
+			when(unitUnderTest.getColumns()).thenReturn(null);
+			// Run & Check
+			assertTrue(unitUnderTest.findAllPrimaryKeyMembers().isEmpty());
+		}
+
+		@Test
+		void returnsAnEmptyList_whenDBColumnListIsEmpty() {
+			// Prepare
+			when(unitUnderTest.getColumns()).thenReturn(List.of());
+			// Run & Check
+			assertTrue(unitUnderTest.findAllPrimaryKeyMembers().isEmpty());
+		}
+
+		@Test
+		void returnsAnEmptyList_whenDBColumnListHasNoPrimaryKeyElementsOnly() {
+			// Prepare
+			when(column.isPrimaryKey()).thenReturn(false);
+			when(unitUnderTest.getColumns()).thenReturn(List.of(column));
+			// Run & Check
+			assertTrue(unitUnderTest.findAllPrimaryKeyMembers().isEmpty());
+		}
+
+		@Test
+		void returnsAListWithPrimaryKeyMembers_whenDBColumnListWithPrimaryKeyElements() {
+			// Prepare
+			when(anotherPrimaryKeyColumn.isPrimaryKey()).thenReturn(true);
+			when(column.isPrimaryKey()).thenReturn(false);
+			when(primaryKeyColumn.isPrimaryKey()).thenReturn(true);
+			when(unitUnderTest.getColumns()).thenReturn(List.of(anotherPrimaryKeyColumn, column, primaryKeyColumn));
+			// Run & Check
+			assertEquals(List.of(anotherPrimaryKeyColumn, primaryKeyColumn), unitUnderTest.findAllPrimaryKeyMembers());
+		}
+	}
 
 	@Nested
 	class findIdFieldName {
 
 		private static final String PRIMARY_KEY_COLUMN_NAME = "PRIMARY_KEY_COLUMN_NAME";
-
-		@Mock
-		private DBColumn column;
-
-		@Mock
-		private DBColumn primaryKeyColumn;
-
-		@Mock
-		private DBColumn anotherPrimaryKeyColumn;
 
 		@Test
 		void returnsAnEmptyOptionalForATableWithoutColumns() {

@@ -1,6 +1,5 @@
 package de.ollie.dbtools.copier;
 
-import de.ollie.dbtools.modelreader.DBColumn;
 import de.ollie.dbtools.modelreader.DBDataScheme;
 import de.ollie.dbtools.modelreader.DBSequence;
 import de.ollie.dbtools.modelreader.DBTable;
@@ -13,8 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class SequenceUpdater {
-
-	private static final String POSTGRESQL_DRIVER_NAME_PART = "postgre";
 
 	public void update(String schemeName, Connection connection, DBDataScheme model) throws SQLException {
 		List<DBSequence> sequences = new JDBCSequenceReader().getSequences(schemeName, connection);
@@ -39,14 +36,11 @@ public class SequenceUpdater {
 
 	private Optional<String> findReasonForNotUpdating(Connection connection, DBDataScheme model, String tableName)
 		throws SQLException {
-		if (!isPostgreConnection(connection)) {
-			return Optional.of("no PostgreSQL connection");
-		}
 		Optional<DBTable> table = model.findByName(tableName);
 		if (table.isEmpty()) {
 			return Optional.of("table '" + tableName + "' is not part of the model");
 		}
-		long primaryKeyColumnCount = countPrimaryKeyColumns(table.get());
+		long primaryKeyColumnCount = table.get().findAllPrimaryKeyMembers().size();
 		if (primaryKeyColumnCount == 0) {
 			return Optional.of("table '" + tableName + "' has no primary key column");
 		}
@@ -69,18 +63,10 @@ public class SequenceUpdater {
 		}
 	}
 
-	private boolean isPostgreConnection(Connection connection) throws SQLException {
-		return connection.getMetaData().getDriverName().toLowerCase().contains(POSTGRESQL_DRIVER_NAME_PART);
-	}
-
 	private Optional<String> findSingleIdFieldName(DBDataScheme model, String tableName) {
 		return model
 			.findByName(tableName)
-			.filter(table -> countPrimaryKeyColumns(table) == 1)
+			.filter(table -> table.findAllPrimaryKeyMembers().size() == 1)
 			.flatMap(DBTable::findIdFieldName);
-	}
-
-	private long countPrimaryKeyColumns(DBTable table) {
-		return table.getColumns().stream().filter(DBColumn::isPrimaryKey).count();
 	}
 }

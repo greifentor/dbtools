@@ -33,6 +33,13 @@ public interface DBTable {
 	 */
 	String getName();
 
+	default List<DBColumn> findAllPrimaryKeyMembers() {
+		if (getColumns() == null) {
+			return List.of();
+		}
+		return getColumns().stream().filter(DBColumn::isPrimaryKey).toList();
+	}
+
 	default Optional<String> findIdFieldName() {
 		return getColumns().stream().filter(DBColumn::isPrimaryKey).map(DBColumn::getName).findFirst();
 	}

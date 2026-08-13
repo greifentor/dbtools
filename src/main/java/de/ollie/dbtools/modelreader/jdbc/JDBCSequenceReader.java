@@ -2,6 +2,7 @@ package de.ollie.dbtools.modelreader.jdbc;
 
 import de.ollie.dbtools.modelreader.DBSequence;
 import de.ollie.dbtools.modelreader.models.DBSequenceModel;
+import de.ollie.dbtools.utils.ConnectionUtil;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ public class JDBCSequenceReader {
 
 	public List<DBSequence> getSequences(String schemeName, Connection connection) throws SQLException {
 		List<DBSequence> sequences = new ArrayList<>();
-		if (connection.getMetaData().getDriverName().toLowerCase().contains("postgre")) {
+		if (ConnectionUtil.isPostgreConnection(connection)) {
 			String sequenceReadStmtString =
 				"SELECT n.nspname AS sequence_schema, c.relname AS sequence_name, s.seqincrement as increment_by, s.seqstart as start_value\n" +
 				"FROM pg_class c \n" +
