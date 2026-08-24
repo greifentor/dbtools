@@ -27,3 +27,6 @@ hs_err_pid*
 /target\generated-sources\annotations/
 /target\generated-test-sources\test-annotations/
 /.project
+/.apt_generated/
+/.apt_generated_tests/
+/pom.xml.versionsBackup

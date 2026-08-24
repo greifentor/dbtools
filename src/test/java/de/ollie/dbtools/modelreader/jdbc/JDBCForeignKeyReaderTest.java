@@ -80,6 +80,7 @@ class JDBCForeignKeyReaderTest {
 			when(dbTable0.getName()).thenReturn(TABLE_NAME_0);
 			when(databaseMetaData.getImportedKeys(null, SCHEME_NAME, TABLE_NAME_0)).thenReturn(resultSet);
 			when(resultSet.next()).thenReturn(true, false);
+			when(resultSet.getString("FKTABLE_SCHEM")).thenReturn(SCHEME_NAME);
 			when(resultSet.getString("FK_NAME")).thenReturn(FOREIGNKEY_NAME_0);
 			when(resultSet.getString("FKTABLE_NAME")).thenReturn(FOREIGNKEY_TABLE_NAME_0);
 			when(resultSet.getString("FKCOLUMN_NAME")).thenReturn(FOREIGNKEY_COLUMN_NAME_0);
@@ -107,6 +108,7 @@ class JDBCForeignKeyReaderTest {
 			when(dbTable0.getName()).thenReturn(TABLE_NAME_0);
 			when(databaseMetaData.getImportedKeys(null, SCHEME_NAME, TABLE_NAME_0)).thenReturn(resultSet);
 			when(resultSet.next()).thenReturn(true, true, false);
+			when(resultSet.getString("FKTABLE_SCHEM")).thenReturn(SCHEME_NAME);
 			when(resultSet.getString("FK_NAME")).thenReturn(FOREIGNKEY_NAME_0, FOREIGNKEY_NAME_0);
 			when(resultSet.getString("FKTABLE_NAME")).thenReturn(FOREIGNKEY_TABLE_NAME_0, FOREIGNKEY_TABLE_NAME_0);
 			when(resultSet.getString("FKCOLUMN_NAME")).thenReturn(FOREIGNKEY_COLUMN_NAME_0, FOREIGNKEY_COLUMN_NAME_1);
@@ -142,6 +144,7 @@ class JDBCForeignKeyReaderTest {
 			when(databaseMetaData.getImportedKeys(null, SCHEME_NAME, TABLE_NAME_0)).thenReturn(resultSet);
 			when(databaseMetaData.getImportedKeys(null, SCHEME_NAME, TABLE_NAME_1)).thenReturn(resultSet);
 			when(resultSet.next()).thenReturn(true, false, true, false);
+			when(resultSet.getString("FKTABLE_SCHEM")).thenReturn(SCHEME_NAME);
 			when(resultSet.getString("FK_NAME")).thenReturn(FOREIGNKEY_NAME_0, FOREIGNKEY_NAME_1);
 			when(resultSet.getString("FKTABLE_NAME")).thenReturn(FOREIGNKEY_TABLE_NAME_0, FOREIGNKEY_TABLE_NAME_1);
 			when(resultSet.getString("FKCOLUMN_NAME")).thenReturn(FOREIGNKEY_COLUMN_NAME_0, FOREIGNKEY_COLUMN_NAME_1);

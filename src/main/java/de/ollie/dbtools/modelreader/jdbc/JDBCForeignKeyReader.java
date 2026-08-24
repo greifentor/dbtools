@@ -23,24 +23,24 @@ public class JDBCForeignKeyReader {
 			try (ResultSet fks = dbmd.getImportedKeys(null, schemeName, table.getName())) {
 				while (fks.next()) {
 					String fkName = fks.getString("FK_NAME");
+					String fkTableSchemeName = fks.getString("FKTABLE_SCHEM");
+					String fkTableName = fks.getString("FKTABLE_NAME");
+					String fkColumnName = fks.getString("FKCOLUMN_NAME");
+					String pkTableName = fks.getString("PKTABLE_NAME");
+					String pkColumnName = fks.getString("PKCOLUMN_NAME");
 					if (foreignKeys.containsKey(fkName)) {
-						foreignKeys.get(fkName).addColumnNames(fks.getString("FKCOLUMN_NAME"), fks.getString("PKCOLUMN_NAME"));
+						foreignKeys.get(fkName).addColumnNames(fkColumnName, pkColumnName);
 					} else {
-						System.out.println("read foreignkey: " + fkName);
+						System.out.println("read foreignkey: " + fkName + " on " + fkTableSchemeName + "." + fkTableName);
 						foreignKeys.put(
 							fkName,
-							new DBForeignKeyModel(
-								fkName,
-								fks.getString("FKTABLE_NAME"),
-								fks.getString("FKCOLUMN_NAME"),
-								fks.getString("PKTABLE_NAME"),
-								fks.getString("PKCOLUMN_NAME")
-							)
+							new DBForeignKeyModel(fkName, fkTableName, fkColumnName, pkTableName, pkColumnName)
 						);
 					}
 				}
 			}
 		}
+		System.out.println("foreign keys read: " + foreignKeys.size() + " (tables checked: " + tables.size() + ")");
 		return foreignKeys.values().stream().sorted((fk0, fk1) -> fk0.getName().compareTo(fk1.getName())).toList();
 	}
 }

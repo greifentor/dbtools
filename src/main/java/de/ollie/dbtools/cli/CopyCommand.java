@@ -28,6 +28,13 @@ public class CopyCommand implements Command {
 	static Logger log = LogManager.getLogger(CopyCommand.class);
 
 	@Parameter(
+		names = { "--recordsPerDot" },
+		required = false,
+		description = "The number of records for any dot on the console output. If not set it's 100."
+	)
+	private int recordsPerDot = 100;
+
+	@Parameter(
 		names = { "--schemeName" },
 		required = false,
 		description = "The name of the scheme. If not passed it's null."
@@ -136,7 +143,8 @@ public class CopyCommand implements Command {
 					includeTableNamePatterns,
 					excludeTableNames,
 					mapTableNameMappings,
-					schemeName
+					schemeName,
+					recordsPerDot
 				);
 		} catch (Exception e) {
 			log.error("error while copying data: " + e.getMessage(), e);

@@ -8,6 +8,7 @@ import de.ollie.dbtools.modelreader.DefaultDBObjectFactory;
 import de.ollie.dbtools.modelreader.jdbc.JDBCForeignKeyReader;
 import de.ollie.dbtools.modelreader.jdbc.JDBCModelReader;
 import de.ollie.dbtools.utils.StatementBuilder;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,11 +29,13 @@ import org.apache.logging.log4j.Logger;
 public class DataCopier {
 
 	static Logger log = LogManager.getLogger(DataCopier.class);
+	static JDBCForeignKeyReader foreignKeyReader = new JDBCForeignKeyReader();
 	static ForeignKeyRemover foreignKeyRemover = new ForeignKeyRemover();
 	static ForeignKeyRestorer foreignKeyRestorer = new ForeignKeyRestorer();
 	static SequenceUpdater sequenceUpater = new SequenceUpdater();
 
 	private StatementBuilder statementBuilder;
+	private int recordsPerDot = 100;
 
 	/**
 	 * Creates a new DataCopier object with the passed parameters.
@@ -51,8 +54,10 @@ public class DataCopier {
 		List<String> includeTableNamePatterns,
 		List<String> excludeTableNames,
 		Map<String, String> tableNameMappings,
-		String schemeName
+		String schemeName,
+		int recordsPerDot
 	) throws Exception {
+		this.recordsPerDot = recordsPerDot;
 		DBDataScheme model = new JDBCModelReader(
 			new DefaultDBObjectFactory(),
 			new DBTypeConverter(),
@@ -62,17 +67,119 @@ public class DataCopier {
 			excludeTableNames
 		)
 			.readModel();
-		List<DBForeignKey<?>> fksTargetDb = new JDBCForeignKeyReader()
-			.getForeignKeys(targetConnection.getMetaData(), schemeName, model.getTables());
-		foreignKeyRemover.remove(fksTargetDb, targetConnection, statementBuilder);
-		for (DBTable table : model.getTables()) {
-			if (deleteBeforeCopy) {
-				deleteTableData(table, targetConnection, tableNameMappings);
+		List<DBForeignKey<?>> fksTargetDb = readForeignKeys(targetConnection, schemeName, model);
+		printDetectedForeignKeys(fksTargetDb);
+		boolean autoCommit = targetConnection.getAutoCommit();
+		targetConnection.setAutoCommit(false);
+		try {
+			foreignKeyRemover.remove(fksTargetDb, targetConnection, statementBuilder);
+			ensureForeignKeysAreRemoved(targetConnection, schemeName, model);
+			for (DBTable table : model.getTables()) {
+				if (deleteBeforeCopy) {
+					deleteTableData(table, targetConnection, tableNameMappings);
+				}
+				copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
 			}
-			copyTableData(table, sourceConnection, targetConnection, tableNameMappings);
+			foreignKeyRestorer.restore(fksTargetDb, targetConnection, statementBuilder);
+			sequenceUpater.update(schemeName, targetConnection, model);
+			targetConnection.commit();
+		} catch (Exception e) {
+			System.out.println("error while copying, rolling back the transaction: " + e.getMessage());
+			targetConnection.rollback();
+			restoreRemovedForeignKeys(targetConnection, schemeName, model, fksTargetDb);
+			throw e;
+		} finally {
+			targetConnection.setAutoCommit(autoCommit);
 		}
-		foreignKeyRestorer.restore(fksTargetDb, targetConnection, statementBuilder);
-		sequenceUpater.update(schemeName, targetConnection, model);
+	}
+
+	private void restoreRemovedForeignKeys(
+		Connection targetConnection,
+		String schemeName,
+		DBDataScheme model,
+		List<DBForeignKey<?>> removedForeignKeys
+	) {
+		try {
+			rollBackRemoval(removedForeignKeys, readForeignKeys(targetConnection, schemeName, model), targetConnection);
+			targetConnection.commit();
+		} catch (Exception e) {
+			log.error("foreign keys could not be restored after the rollback: " + e.getMessage(), e);
+		}
+	}
+
+	private List<DBForeignKey<?>> readForeignKeys(Connection targetConnection, String schemeName, DBDataScheme model)
+		throws SQLException {
+		return foreignKeyReader.getForeignKeys(targetConnection.getMetaData(), schemeName, model.getTables());
+	}
+
+	private void ensureForeignKeysAreRemoved(Connection targetConnection, String schemeName, DBDataScheme model)
+		throws Exception {
+		List<DBForeignKey<?>> stillPresentForeignKeys = readForeignKeys(targetConnection, schemeName, model);
+		if (stillPresentForeignKeys.isEmpty()) {
+			return;
+		}
+		printForeignKeys("foreign key still present after removal: ", stillPresentForeignKeys);
+		waitForKeyPressed();
+		foreignKeyRemover.remove(stillPresentForeignKeys, targetConnection, statementBuilder);
+		stillPresentForeignKeys = readForeignKeys(targetConnection, schemeName, model);
+		if (stillPresentForeignKeys.isEmpty()) {
+			System.out.println("all foreign keys removed by the second attempt.");
+			return;
+		}
+		printForeignKeys("foreign key not removable: ", stillPresentForeignKeys);
+		throw new IllegalStateException("foreign keys could not be removed: " + getNames(stillPresentForeignKeys));
+	}
+
+	private void printDetectedForeignKeys(List<DBForeignKey<?>> foreignKeys) {
+		System.out.println("foreign keys detected in the target database: " + foreignKeys.size());
+		for (DBForeignKey<?> fk : foreignKeys) {
+			System.out.println(
+				"- " +
+				fk.getName() +
+				": table=" +
+				fk.getTableName() +
+				", key columns=" +
+				fk.getKeyColumnNames() +
+				", referenced table=" +
+				fk.getReferencedTableName() +
+				", referenced key columns=" +
+				fk.getReferencedKeyColumnNames()
+			);
+		}
+	}
+
+	private void printForeignKeys(String message, List<DBForeignKey<?>> foreignKeys) {
+		for (DBForeignKey<?> fk : foreignKeys) {
+			System.out.println(message + fk.getName() + " on table " + fk.getTableName());
+		}
+	}
+
+	private void rollBackRemoval(
+		List<DBForeignKey<?>> removedForeignKeys,
+		List<DBForeignKey<?>> stillPresentForeignKeys,
+		Connection targetConnection
+	) throws SQLException {
+		List<DBForeignKey<?>> foreignKeysToRestore = removedForeignKeys
+			.stream()
+			.filter(fk -> !isContained(fk, stillPresentForeignKeys))
+			.toList();
+		System.out.println("rolling back the removal of " + foreignKeysToRestore.size() + " foreign key(s)");
+		foreignKeyRestorer.restore(foreignKeysToRestore, targetConnection, statementBuilder);
+	}
+
+	private boolean isContained(DBForeignKey<?> foreignKey, List<DBForeignKey<?>> foreignKeys) {
+		return foreignKeys
+			.stream()
+			.anyMatch(fk -> fk.getName().equals(foreignKey.getName()) && fk.getTableName().equals(foreignKey.getTableName()));
+	}
+
+	private String getNames(List<DBForeignKey<?>> foreignKeys) {
+		return foreignKeys.stream().map(DBForeignKey::getName).reduce((s0, s1) -> s0 + ", " + s1).orElse("");
+	}
+
+	private void waitForKeyPressed() throws IOException {
+		System.out.println("press ENTER to continue ...");
+		System.in.read();
 	}
 
 	private void deleteTableData(DBTable table, Connection connection, Map<String, String> tableNameMappings)
@@ -111,7 +218,7 @@ public class DataCopier {
 			}
 			targetStatement.executeUpdate();
 			current++;
-			if (current % 100 == 0) {
+			if (current % recordsPerDot == 0) {
 				System.out.print(".");
 			}
 			log.info(
